@@ -408,7 +408,7 @@ class Game:
         # Sprites
         options_bg = pg.image.load(join('assets', 'img', 'ui', 'options_background.png')).convert_alpha()
         
-        return_button = Button(self.options_sprites, 'return to start menu', self.return_button_surfs, (settings.W / 2, 965), self.font, 'dark')
+        return_button = Button(self.options_sprites, 'return to main menu', self.return_button_surfs, (settings.W / 2, 965), self.font, 'dark')
         
         fullscreen_checkbox = Checkbox(self.options_sprites, self.checkbox_surfs, (1480, 260), self.user_settings, "Fullscreen")
         master_volume_slider = Slider(self.options_sprites, self.slider_surfs, (1750, 430), self.user_settings, "Master Volume")
