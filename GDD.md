@@ -20,6 +20,7 @@ This screen will display when the program is launched, and will pass after a mom
 ![A pink-and-black yin-and-yang symbol where each half has a cartoon cat face and cat ears. ](randomcharactergenerator/assets/img/gdd/studio_meow_tao_logo_small.png)
 
 ## Start screen (a.k.a Main Menu)
+![](randomcharactergenerator/assets/img/gdd/start_menu_mockup.png)
 This is the screen that will display after the splash screen has passed. It will feature an animated background graphic, a splash art containing the title to the left, and a menu to the right. Gentle background music will be playing, which will persist between screens. 
 
 The UI will be aesthetically appealing and match the tone of the game, including a custom mouse cursor. The menu options will be 'START', 'ABOUT', 'OPTIONS', and 'QUIT'. The options can be navigated by mouse, by WASD keys, or by arrow keys. The selected button (or the button being hovered over if the mouse is in use) will be visually different by becoming larger and highlighted. There will be sound effects for changing the selected button and confirming your selection. 
@@ -27,6 +28,7 @@ The UI will be aesthetically appealing and match the tone of the game, including
 Selecting a button will fade to black and then fade into that screen. 
 
 ## Options screen
+![A pink options screen with options for fullscreen and volume.](randomcharactergenerator/assets/img/gdd/options_menu_mockup.png)
 The options screen can be accessed from the start screen. On top of its unique background art, it includes the following: 
 1. Fullscreen (Box which toggles between having a checkmark or being empty)
 2. Master Volume (Slider)
@@ -35,6 +37,7 @@ The options screen can be accessed from the start screen. On top of its unique b
 5. Return to Start Menu (Button)
 
 ## Gameplay screen
+![A mockup of the game's gameplay screen, with buttons for 'randomize', 'save image', 'main menu', a cog button, a zoom slider, and four background options. The background is the leaning tower of Piza, blurred, and the catgirl seen earlier in this GDD is present.](randomcharactergenerator/assets/img/gdd/play_screen_mockup.png)
 This is where the program's random character generation takes place, and where the user/player will spend the majority of their time. 
 The character will not be visible when this screen is first accessed, and will only appear when they hit the 'RANDOMIZE' button for the first time. SFX and VFX will be used to make the randomize button fun and satisfying to use. 
 
@@ -46,10 +49,10 @@ In addition to the randomize button, these buttons will be present:
 2. Change Background (Cycle through options with arrow buttons)
 4. Save my Creation
 The first two of these buttons will be on a header bar at the top of the screen. The third and fourth will be just below the randomize button, to the side of the character. The intended method of navigating the buttons is the mouse, but pressing a WASD key or an arrow key will select the randomize button, and further key presses will cycle through the four buttons. 
+### Save Image
+This will save a .png image of the character to the Pictures folder which exists by default on all Windows machines, or its equivalent on Mac, and then display a popup in the corner of the screen saying "Saved to [PATH]!"
 ### Change Background
 This will cycle through a number of pieces of background art, showing places for the character to be standing. This might eventually include different outdoor environments at different times of day or night, as well as cozy in-door environments. 
-### Save my Creation
-This will save a .png image of the character to the Pictures folder which exists by default on all Windows machines, or its equivalent on Mac, and then display a popup in the corner of the screen saying "Saved to [PATH]!"
 
 ## In-depth Feature Description
 ### Randomize Feature
