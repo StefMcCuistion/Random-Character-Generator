@@ -136,7 +136,10 @@ class Button(pg.sprite.Sprite):
         self.font_color = self.selected_color
         self.name = name
         self.text = self.font.render(self.name, True, self.font_color)
-        self.text_rect = self.text.get_frect(center = (self.rect.center[0], self.rect.center[1] + 22))
+        if self.name != 'randomize': 
+            self.text_rect = self.text.get_frect(center = (self.rect.center[0], self.rect.center[1] + 22))
+        else: 
+            self.text_rect = self.text.get_frect(center = (self.rect.center[0] + 95, self.rect.center[1] + 20))
 
 
     def update(self, display):
@@ -276,6 +279,7 @@ class Game:
         else:
             self.display = pg.display.set_mode((settings.W, settings.H))
         self.font = pg.font.Font(join('assets', 'motley_forces.ttf'), 90)
+        self.playscreen_button_font = pg.font.Font(join('assets', 'motley_forces.ttf'), 80)
         pg.display.set_caption("Dress Up Game")
         if not self.fullscreen:  # These just slow down game launch if done in fullscreen
             os.environ["SDL_VIDEO_CENTERED"] = "1"  # Centers window
@@ -322,6 +326,21 @@ class Game:
                                'unselected_hover': pg.image.load(join('assets', 'img', 'ui', 'checkbox_unchecked_hover.png')).convert_alpha(),
                                'selected': pg.image.load(join('assets', 'img', 'ui', 'checkbox_checked.png')).convert_alpha(),
                                'selected_hover': pg.image.load(join('assets', 'img', 'ui', 'checkbox_checked_hover.png')).convert_alpha()
+        }
+        
+        self.randomize_button_surfs = {
+                                       'unselected': pg.image.load(join('assets', 'img', 'ui', 'randomize_unselected.png')).convert_alpha(),
+                                       'selected': pg.image.load(join('assets', 'img', 'ui', 'randomize_selected.png')).convert_alpha(),
+        }
+        
+        self.save_image_button_surfs = {
+                                        'unselected': pg.image.load(join('assets', 'img', 'ui', 'save_image_unselected.png')).convert_alpha(), 
+                                        'selected': pg.image.load(join('assets', 'img', 'ui', 'save_image_selected.png')).convert_alpha()
+        }
+        
+        self.back_button_surfs = {
+                                  'unselected': pg.image.load(join('assets', 'img', 'ui', 'back_button_unselected.png')).convert_alpha(),
+                                  'selected': pg.image.load(join('assets', 'img', 'ui', 'back_button_selected.png')).convert_alpha()
         }
         
         # Imports: Background Hearts
@@ -465,6 +484,9 @@ class Game:
         # Sprites
         self.player = Player(self.play_sprites, self.player_parts)
         play_bg = pg.image.load(join('assets', 'img', 'ui', 'halftone_bg.png')).convert_alpha()
+        randomize_button = Button(self.play_sprites, 'randomize', self.randomize_button_surfs, (470, 260), self.playscreen_button_font, 'light')
+        save_image_button = Button(self.play_sprites, 'save image', self.save_image_button_surfs, (495, 465), self.playscreen_button_font, 'light')
+        back_button = Button(self.play_sprites, 'main menu', self.back_button_surfs, (312, 955), self.playscreen_button_font, 'light')
 
         # Loop
         while self.running:
@@ -476,15 +498,20 @@ class Game:
                 if event.type == pg.KEYDOWN:
                     if event.key == pg.K_ESCAPE:
                         self.running = False
-                    if event.key == pg.K_s:
+                if event.type == pg.MOUSEBUTTONDOWN:
+                    if randomize_button.check_for_input():
+                        self.player.change_appearance()
+                    elif save_image_button.check_for_input():
+                        print('save image')
+                    elif back_button.check_for_input():
                         for sprite in self.play_sprites:
                             sprite.kill()
                         self.start()
-                if event.type == pg.MOUSEBUTTONDOWN:
-                    self.player.change_appearance()
+                        
             # Render
             self.display.blit(play_bg)
             self.play_sprites.draw(self.display)
+            self.play_sprites.update(self.display)
             pg.display.flip()
 
         pg.quit()

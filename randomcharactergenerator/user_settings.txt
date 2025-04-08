@@ -1,1 +1,1 @@
-{"Fullscreen": false, "Master Volume": 0, "Music Volume": 74, "SFX Volume": 100}
+{"Fullscreen": true, "Master Volume": 60, "Music Volume": 74, "SFX Volume": 100}
