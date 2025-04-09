@@ -2,6 +2,8 @@ import io
 from random import randint, uniform
 import pygame as pg
 
+import datetime
+
 import json
 
 from pygame import mixer
@@ -94,6 +96,9 @@ class Player(pg.sprite.Sprite):
         final_surf = pg.image.frombytes(data, (1766, 2513), "RGBA")
         final_surf = pg.transform.scale_by(final_surf, .46)
         self.image = final_surf
+        
+    def return_image(self):
+        return self.image
 
 class Heart(pg.sprite.Sprite):
     def __init__(self, surf, pos, groups):
@@ -502,7 +507,11 @@ class Game:
                     if randomize_button.check_for_input():
                         self.player.change_appearance()
                     elif save_image_button.check_for_input():
-                        print('save image')
+                        now = str(datetime.datetime.now())
+                        print(f'original = {now}')
+                        now_formatted = now.replace(' ', '.').replace(':', '.').replace('-', '.')
+                        print('new = ', now_formatted)
+                        pg.image.save(self.player.return_image(), join('your images', f'{now_formatted}.png'))
                     elif back_button.check_for_input():
                         for sprite in self.play_sprites:
                             sprite.kill()
