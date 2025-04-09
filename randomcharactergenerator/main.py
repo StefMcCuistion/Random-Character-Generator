@@ -98,7 +98,36 @@ class Player(pg.sprite.Sprite):
         self.image = final_surf
         
     def return_image(self):
-        return self.image
+        # Draws character at max res and returns it
+        surf = pg.Surface((1766, 2513), pg.SRCALPHA)
+        if self.tops[self.tops_idx] != 'none':
+            surf.blit(self.parts[f'top_{self.tops[self.tops_idx]}_back1'])
+        if self.hairstyles[self.hairstyles_idx] != 'bald':
+            surf.blit(self.parts[f'hair_{self.hairstyles[self.hairstyles_idx]}_{self.hair_colors[self.hair_colors_idx]}_back'])
+        if self.races[self.races_idx] == "cat":
+            surf.blit(self.parts[f'tail_cat_{self.hair_colors[self.hair_colors_idx]}'])
+        if self.tops[self.tops_idx] != 'none':
+            surf.blit(self.parts[f'top_{self.tops[self.tops_idx]}_back2'])
+        surf.blit(self.parts[f'body_{self.skin_colors[self.skin_colors_idx]}'])
+        surf.blit(self.parts[f'socks_{self.socks[self.socks_idx]}'])
+        surf.blit(self.parts[f'bottom_{self.bottoms[self.bottoms_idx]}'])
+        surf.blit(self.parts[f'chest_{self.chests[self.chests_idx]}'])
+        surf.blit(self.parts[f'arm_{self.skin_colors[self.skin_colors_idx]}'])
+        surf.blit(self.parts[f'top_{self.tops[self.tops_idx]}_front'])
+        surf.blit(self.parts[f'face_purple'])
+        if self.races[self.races_idx] == "cat":
+            surf.blit(self.parts[f'catear_back_{self.hair_colors[self.hair_colors_idx]}'])
+            surf.blit(self.parts[f'catear_under_hair_{self.hair_colors[self.hair_colors_idx]}'])
+        else:
+            surf.blit(self.parts[f'humanear_{self.skin_colors[self.skin_colors_idx]}'])
+        if self.hairstyles[self.hairstyles_idx] != 'bald':
+            surf.blit(self.parts[f'hair_{self.hairstyles[self.hairstyles_idx]}_{self.hair_colors[self.hair_colors_idx]}_front'])
+        if self.races[self.races_idx] == "cat":
+            surf.blit(self.parts[f'catear_front_{self.hair_colors[self.hair_colors_idx]}'])
+
+        data = pg.image.tobytes(surf, "RGBA")
+        final_surf = pg.image.frombytes(data, (1766, 2513), "RGBA")
+        return final_surf
 
 class Heart(pg.sprite.Sprite):
     def __init__(self, surf, pos, groups):
