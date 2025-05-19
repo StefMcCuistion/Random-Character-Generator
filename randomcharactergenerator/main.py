@@ -29,12 +29,12 @@ class Player(pg.sprite.Sprite):
         self.parts = parts
         self.skin_colors = ["fair", "pale_brown"]
         self.races = ["human", "cat"]
-        self.hairstyles = ["bald", "emo", "bubble_braid"]
+        self.hairstyles = ["emo", "bubble_braid"]
         self.hair_colors = ["black", "blonde", "brown", "purple"]
         self.bottoms = ["shorts", "skirt"]
         self.chests = ["cropped_shirt", "bra"]
-        self.tops = ["none", "anime_jacket", "jacket", "coat", 'cropped_hoodie']
-        self.socks = ["none", "leggings", "thigh_highs_black", "thigh_highs_cream"]
+        self.tops = ["none", "jacket", "coat"]
+        self.socks = ["none", "leggings", "thigh_highs_black"]
         
         # Index Defaults, used when not randomized
         self.skin_colors_idx = 0
@@ -185,11 +185,14 @@ class Button(pg.sprite.Sprite):
             self.font_color = self.unselected_color
         self.text = self.font.render(self.name, True, self.font_color)
         if self.selected:
-            self.image = self.surfs['selected']
-            self.rect = self.image.get_frect(center = self.pos)
+            if pg.mouse.get_pressed()[0]:
+                if self.name == 'randomize' or self.name == 'save image':
+                    self.image = self.surfs['pressed']  
+            else:
+                self.image = self.surfs['selected']
         else:
             self.image = self.surfs['unselected']
-            self.rect = self.image.get_frect(center = self.pos)
+        self.rect = self.image.get_frect(center = self.pos)
         display.blit(self.text, self.text_rect)
 
 
@@ -365,11 +368,13 @@ class Game:
         self.randomize_button_surfs = {
                                        'unselected': pg.image.load(join('assets', 'img', 'ui', 'randomize_unselected.png')).convert_alpha(),
                                        'selected': pg.image.load(join('assets', 'img', 'ui', 'randomize_selected.png')).convert_alpha(),
+                                       'pressed': pg.image.load(join('assets', 'img', 'ui', 'randomize_pressed.png')).convert_alpha()
         }
         
         self.save_image_button_surfs = {
                                         'unselected': pg.image.load(join('assets', 'img', 'ui', 'save_image_unselected.png')).convert_alpha(), 
-                                        'selected': pg.image.load(join('assets', 'img', 'ui', 'save_image_selected.png')).convert_alpha()
+                                        'selected': pg.image.load(join('assets', 'img', 'ui', 'save_image_selected.png')).convert_alpha(),
+                                        'pressed': pg.image.load(join('assets', 'img', 'ui', 'save_image_pressed.png')).convert_alpha()
         }
         
         self.back_button_surfs = {
