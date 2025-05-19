@@ -382,6 +382,17 @@ class Game:
                                   'selected': pg.image.load(join('assets', 'img', 'ui', 'back_button_selected.png')).convert_alpha()
         }
         
+        self.background_button_surfs = {
+                                        'halftone_unselected': pg.image.load(join('assets', 'img', 'ui', 'bg_halftone_button_unselected.png')).convert_alpha(),
+                                        'halftone_selected': pg.image.load(join('assets', 'img', 'ui', 'bg_halftone_button_selected.png')).convert_alpha(),
+                                        'outdoors_unselected':pg.image.load(join('assets', 'img', 'ui', 'bg_outdoors_button_unselected.png')).convert_alpha(),
+                                        'outdoors_selected':pg.image.load(join('assets', 'img', 'ui', 'bg_outdoors_button_selected.png')).convert_alpha(),
+                                        'hotel_unselected':pg.image.load(join('assets', 'img', 'ui', 'bg_hotel_button_unselected.png')).convert_alpha(),
+                                        'hotel_selected':pg.image.load(join('assets', 'img', 'ui', 'bg_hotel_button_selected.png')).convert_alpha(),
+                                        'piza_unselected':pg.image.load(join('assets', 'img', 'ui', 'bg_piza_button_unselected.png')).convert_alpha(),
+                                        'piza_seleted':pg.image.load(join('assets', 'img', 'ui', 'bg_piza_button_selected.png')).convert_alpha()
+        }
+        
         # Imports: Background Hearts
         self.heart_surf = pg.image.load(join(asset_location, 'img', 'ui', 'heart.png')).convert_alpha()
         
