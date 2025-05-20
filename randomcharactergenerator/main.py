@@ -280,7 +280,7 @@ class Slider(pg.sprite.Sprite):
 
     def give_idx(self):
         return self.idx
-
+    
 class Checkbox(pg.sprite.Sprite):
     def __init__(self, groups, surfs, pos, user_settings, name):
         super().__init__(groups)
@@ -450,6 +450,13 @@ class Game:
         # Imports: Audio
         
         pg.mixer.music.load(join('assets', 'audio', '90s_Bodybuilding_Music_by_Aries_Beats.mp3'))
+        
+        self.sfx_button_click = pg.mixer.Sound(join('assets', 'audio', 'sfx', 'Minimalist3.ogg'))
+        self.sfx_save_image = pg.mixer.Sound(join('assets', 'audio', 'sfx', 'Minimalist13.ogg'))
+        self.sfx_randomize = pg.mixer.Sound(join('assets', 'audio', 'sfx', 'Minimalist9.ogg'))
+        self.sfx_button_click.set_volume((self.user_settings['Master Volume'] / 100) * (self.user_settings['SFX Volume'] / 100))
+        self.sfx_save_image.set_volume((self.user_settings['Master Volume'] / 100) * (self.user_settings['SFX Volume'] / 100))
+        self.sfx_randomize.set_volume((self.user_settings['Master Volume'] / 100) * (self.user_settings['SFX Volume'] / 100))
 
         # Sprite groups
         self.start_sprites = pg.sprite.Group()
@@ -465,8 +472,6 @@ class Game:
         
 
     def start(self):
-
-        self.display.fill('black')
 
         # Sprites
         start_button = Button(self.start_sprites, 'start', self.button_surfs, (1495, 290), self.font, 'light')
@@ -500,18 +505,22 @@ class Game:
                         self.running = False
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if start_button.check_for_input():
+                        self.sfx_button_click.play()
                         for sprite in self.start_sprites:
                             sprite.kill()
                         self.play()
                     elif options_button.check_for_input():
+                        self.sfx_button_click.play()
                         for sprite in self.start_sprites:
                             sprite.kill()
                         self.options()
                     elif about_button.check_for_input():
+                        self.sfx_button_click.play()
                         for sprite in self.start_sprites:
                             sprite.kill()
                         self.about()
                     elif close_button.check_for_input():
+                        self.sfx_button_click.play()
                         self.running = False
 
             # Render
@@ -526,9 +535,7 @@ class Game:
         exit()
 
     def options(self):
-        
-        self.display.fill('black')
-        
+                
         # Sprites
         options_bg = pg.image.load(join('assets', 'img', 'ui', 'options_background.png')).convert_alpha()
         
@@ -551,17 +558,20 @@ class Game:
                         self.running = False
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if return_button.check_for_input():
+                        self.sfx_button_click.play()
                         with open('user_settings.txt', 'w') as settings_file:
                             json.dump(self.user_settings, settings_file)
                         for sprite in self.options_sprites:
                             sprite.kill()
                         self.start()
                 if event.type == pg.MOUSEBUTTONUP:
-                        self.fullscreen = self.user_settings['Fullscreen']
-                        if self.fullscreen:
-                            self.display = pg.display.set_mode((settings.W, settings.H), pg.FULLSCREEN)
-                        else:
-                            self.display = pg.display.set_mode((settings.W, settings.H))
+                    if sfx_volume_slider.in_use or music_volume_slider.in_use or master_volume_slider.in_use:
+                        self.sfx_button_click.play()
+                    self.fullscreen = self.user_settings['Fullscreen']
+                    if self.fullscreen:
+                        self.display = pg.display.set_mode((settings.W, settings.H), pg.FULLSCREEN)
+                    else:
+                        self.display = pg.display.set_mode((settings.W, settings.H))
 
             
             # Update User Settings
@@ -570,7 +580,12 @@ class Game:
             self.user_settings['Music Volume'] = music_volume_slider.give_idx()
             self.user_settings['SFX Volume'] = sfx_volume_slider.give_idx()
             music_volume = (self.user_settings['Master Volume'] / 100) * (self.user_settings['Music Volume'] / 100)
+            sfx_volume = (self.user_settings['Master Volume'] / 100) * (self.user_settings['SFX Volume'] /100)
+            self.sfx_randomize.set_volume((self.user_settings['Master Volume'] / 100) * (self.user_settings['SFX Volume'] / 100))
+
             pg.mixer.music.set_volume(music_volume)
+            self.sfx_button_click.set_volume(sfx_volume)
+            self.sfx_save_image.set_volume(sfx_volume)
             print(self.user_settings)
 
 
@@ -583,7 +598,6 @@ class Game:
         exit()
 
     def about(self):
-        self.display.fill('black')
         
         # Sprites
         about_bg = self.background_surfs['halftone']
@@ -602,6 +616,7 @@ class Game:
                         self.running = False
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if return_button.check_for_input():
+                        self.sfx_button_click.play()
                         for sprite in self.about_sprites:
                             sprite.kill()
                         self.start()
@@ -614,8 +629,6 @@ class Game:
 
 
     def play(self):
-
-        self.display.fill('black')
         
         bg = 'halftone'
 
@@ -643,22 +656,29 @@ class Game:
                         self.running = False
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if randomize_button.check_for_input():
+                        self.sfx_randomize.play()
                         self.player.change_appearance()
                     elif halftone_bg_button.check_for_input():
+                        self.sfx_button_click.play()
                         bg = halftone_bg_button.name
                     elif outdoors_bg_button.check_for_input():
+                        self.sfx_button_click.play()
                         bg = outdoors_bg_button.name
                     elif hotel_bg_button.check_for_input():
+                        self.sfx_button_click.play()
                         bg = hotel_bg_button.name
                     elif piza_bg_button.check_for_input():
+                        self.sfx_button_click.play()
                         bg = piza_bg_button.name
                     elif save_image_button.check_for_input():
+                        self.sfx_save_image.play()
                         now = str(datetime.datetime.now())
                         print(f'original = {now}')
                         now_formatted = now.replace(' ', '.').replace(':', '.').replace('-', '.')
                         print('new = ', now_formatted)
                         pg.image.save(self.player.return_image(), join('your images', f'{now_formatted}.png'))
                     elif back_button.check_for_input():
+                        self.sfx_button_click.play()
                         for sprite in self.play_sprites:
                             sprite.kill()
                         self.start()

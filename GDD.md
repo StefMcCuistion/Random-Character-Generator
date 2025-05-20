@@ -48,6 +48,7 @@ In addition to the randomize button, these buttons will be present:
 2. Quit to Desktop
 2. Change Background (Cycle through options with arrow buttons)
 4. Save my Creation
+
 The first two of these buttons will be on a header bar at the top of the screen. The third and fourth will be just below the randomize button, to the side of the character. The intended method of navigating the buttons is the mouse, but pressing a WASD key or an arrow key will select the randomize button, and further key presses will cycle through the four buttons. 
 ### Save Image
 This will save a .png image of the character to the Pictures folder which exists by default on all Windows machines, or its equivalent on Mac, and then display a popup in the corner of the screen saying "Saved to [PATH]!"
