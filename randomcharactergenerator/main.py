@@ -507,6 +507,10 @@ class Game:
                         for sprite in self.start_sprites:
                             sprite.kill()
                         self.options()
+                    elif about_button.check_for_input():
+                        for sprite in self.start_sprites:
+                            sprite.kill()
+                        self.about()
                     elif close_button.check_for_input():
                         self.running = False
 
@@ -578,6 +582,37 @@ class Game:
         pg.quit()
         exit()
 
+    def about(self):
+        self.display.fill('black')
+        
+        # Sprites
+        about_bg = self.background_surfs['halftone']
+        
+        return_button = Button(self.about_sprites, 'return to main menu', self.return_button_surfs, (settings.W / 2, 965), self.font, 'dark')
+                        
+        # Loop
+        while self.running:
+            self.dt = self.clock.tick() / 1000
+            # Event loop
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    self.running = False
+                if event.type == pg.KEYDOWN:
+                    if event.key == pg.K_ESCAPE:
+                        self.running = False
+                if event.type == pg.MOUSEBUTTONDOWN:
+                    if return_button.check_for_input():
+                        for sprite in self.about_sprites:
+                            sprite.kill()
+                        self.start()
+            
+            # Render
+            self.display.blit(about_bg)
+            self.about_sprites.draw(self.display)
+            self.about_sprites.update(self.display)
+            pg.display.flip()
+
+
     def play(self):
 
         self.display.fill('black')
@@ -591,7 +626,7 @@ class Game:
         save_image_button = Button(self.play_sprites, 'save image', self.save_image_button_surfs, (495, 465), self.playscreen_button_font, 'light')
         back_button = Button(self.play_sprites, 'main menu', self.back_button_surfs, (312, 955), self.playscreen_button_font, 'light')
         backgrounds_label = BackgroundsLabel(self.play_sprites, self.backgrounds_label_surf, (245, 675))
-        halftone_bg_button = BackgroundsButton(self.play_sprites, 'halftone', 'unselected', self.background_button_surfs, (450, 675))
+        halftone_bg_button = BackgroundsButton(self.play_sprites, 'halftone', 'selected', self.background_button_surfs, (450, 675))
         outdoors_bg_button = BackgroundsButton(self.play_sprites, 'outdoors', 'unselected', self.background_button_surfs, (550, 675))
         hotel_bg_button = BackgroundsButton(self.play_sprites, 'hotel', 'unselected', self.background_button_surfs, (650, 675))
         piza_bg_button = BackgroundsButton(self.play_sprites, 'piza', 'unselected', self.background_button_surfs, (750, 675))
