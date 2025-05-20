@@ -201,6 +201,37 @@ class Button(pg.sprite.Sprite):
         pos = (pg.mouse.get_pos())
         if pos[0] in (range(int(self.rect.left), int(self.rect.right))) and pos[1] in range(int(self.rect.top), int(self.rect.bottom)):
             return 1
+        
+class BackgroundsButton(pg.sprite.Sprite):
+    def __init__(self, groups, name, selected, surfs, pos):
+        super().__init__(groups)
+        self.name = name
+        self.selected = selected
+        self.surfs = surfs
+        self.image = self.surfs[f'{self.name}_{self.selected}']
+        self.pos = pos
+        self.rect = self.image.get_frect(center = self.pos)
+
+
+    def update(self, display):
+        if self.check_for_input():
+            self.selected = 'selected'
+        self.image = self.surfs[f'{self.name}_{self.selected}']
+        self.rect = self.image.get_frect(center = self.pos)
+        
+    def change_appearance(self, bg):
+        if self.name == bg:
+            self.selected = 'selected'
+        else:
+            self.selected = 'unselected'
+        self.image = self.surfs[f'{self.name}_{self.selected}']
+        self.rect = self.image.get_frect(center = self.pos)
+
+    def check_for_input(self):
+        pos = (pg.mouse.get_pos())
+        if pos[0] in (range(int(self.rect.left), int(self.rect.right))) and pos[1] in range(int(self.rect.top), int(self.rect.bottom)) and pg.mouse.get_just_pressed()[0]:
+            return 1
+
 
 class Slider(pg.sprite.Sprite):
     def __init__(self, groups, surfs, pos, user_settings, name):
@@ -284,6 +315,13 @@ class Checkbox(pg.sprite.Sprite):
         
     def give_state(self):
         return self.selected
+    
+class BackgroundsLabel(pg.sprite.Sprite):
+    def __init__(self, groups, surf, pos):
+        super().__init__(groups)
+        self.image = surf
+        self.pos = pos
+        self.rect = self.image.get_frect(center=self.pos)
 
 class Game:
 
@@ -341,6 +379,14 @@ class Game:
                     path = join(folder_path, file_name)
                     surf = pg.image.load(path).convert_alpha()
                     self.player_parts[file_name.split('.')[0]] = surf
+                    
+        # Imports: Backgrounds
+        self.background_surfs = {
+                                'halftone': pg.image.load(join('assets', 'img', 'backgrounds', 'halftone.png')).convert_alpha(),
+                                'outdoors': pg.image.load(join('assets', 'img', 'backgrounds', 'outdoors.png')).convert_alpha(),
+                                'hotel': pg.image.load(join('assets', 'img', 'backgrounds', 'hotel.png')).convert_alpha(),
+                                'piza': pg.image.load(join('assets', 'img', 'backgrounds', 'piza.png')).convert_alpha()
+        }
 
         # Imports: Buttons and Sliders
         self.button_surfs = {
@@ -390,8 +436,10 @@ class Game:
                                         'hotel_unselected':pg.image.load(join('assets', 'img', 'ui', 'bg_hotel_button_unselected.png')).convert_alpha(),
                                         'hotel_selected':pg.image.load(join('assets', 'img', 'ui', 'bg_hotel_button_selected.png')).convert_alpha(),
                                         'piza_unselected':pg.image.load(join('assets', 'img', 'ui', 'bg_piza_button_unselected.png')).convert_alpha(),
-                                        'piza_seleted':pg.image.load(join('assets', 'img', 'ui', 'bg_piza_button_selected.png')).convert_alpha()
+                                        'piza_selected':pg.image.load(join('assets', 'img', 'ui', 'bg_piza_button_selected.png')).convert_alpha()
         }
+        
+        self.backgrounds_label_surf = pg.image.load(join('assets', 'img', 'ui', 'backgrounds_label.png')).convert_alpha()
         
         # Imports: Background Hearts
         self.heart_surf = pg.image.load(join(asset_location, 'img', 'ui', 'heart.png')).convert_alpha()
@@ -530,6 +578,8 @@ class Game:
     def play(self):
 
         self.display.fill('black')
+        
+        bg = 'halftone'
 
         # Sprites
         self.player = Player(self.play_sprites, self.player_parts)
@@ -537,6 +587,11 @@ class Game:
         randomize_button = Button(self.play_sprites, 'randomize', self.randomize_button_surfs, (470, 260), self.playscreen_button_font, 'light')
         save_image_button = Button(self.play_sprites, 'save image', self.save_image_button_surfs, (495, 465), self.playscreen_button_font, 'light')
         back_button = Button(self.play_sprites, 'main menu', self.back_button_surfs, (312, 955), self.playscreen_button_font, 'light')
+        backgrounds_label = BackgroundsLabel(self.play_sprites, self.backgrounds_label_surf, (245, 675))
+        halftone_bg_button = BackgroundsButton(self.play_sprites, 'halftone', 'unselected', self.background_button_surfs, (450, 675))
+        outdoors_bg_button = BackgroundsButton(self.play_sprites, 'outdoors', 'unselected', self.background_button_surfs, (550, 675))
+        hotel_bg_button = BackgroundsButton(self.play_sprites, 'hotel', 'unselected', self.background_button_surfs, (650, 675))
+        piza_bg_button = BackgroundsButton(self.play_sprites, 'piza', 'unselected', self.background_button_surfs, (750, 675))
 
         # Loop
         while self.running:
@@ -551,6 +606,14 @@ class Game:
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if randomize_button.check_for_input():
                         self.player.change_appearance()
+                    elif halftone_bg_button.check_for_input():
+                        bg = halftone_bg_button.name
+                    elif outdoors_bg_button.check_for_input():
+                        bg = outdoors_bg_button.name
+                    elif hotel_bg_button.check_for_input():
+                        bg = hotel_bg_button.name
+                    elif piza_bg_button.check_for_input():
+                        bg = piza_bg_button.name
                     elif save_image_button.check_for_input():
                         now = str(datetime.datetime.now())
                         print(f'original = {now}')
@@ -561,9 +624,14 @@ class Game:
                         for sprite in self.play_sprites:
                             sprite.kill()
                         self.start()
+                    halftone_bg_button.change_appearance(bg)
+                    outdoors_bg_button.change_appearance(bg)
+                    hotel_bg_button.change_appearance(bg)
+                    piza_bg_button.change_appearance(bg)
+
                         
             # Render
-            self.display.blit(play_bg)
+            self.display.blit(self.background_surfs[bg])
             self.play_sprites.draw(self.display)
             self.play_sprites.update(self.display)
             pg.display.flip()
