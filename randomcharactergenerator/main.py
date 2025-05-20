@@ -31,9 +31,9 @@ class Player(pg.sprite.Sprite):
         self.races = ["human", "cat"]
         self.hairstyles = ["emo", "bubble_braid"]
         self.hair_colors = ["black", "blonde", "brown", "purple"]
-        self.bottoms = ["shorts", "skirt"]
-        self.chests = ["cropped_shirt", "bra"]
-        self.tops = ["none", "jacket", "coat"]
+        self.bottoms = ["shorts", "skirt", "microkini"]
+        self.chests = ["cropped_shirt", "bra", "turtleneck", "microkini"]
+        self.tops = ["none", "jacket", "coat", "maid_dress"]
         self.socks = ["none", "leggings", "thigh_highs_black"]
         
         # Index Defaults, used when not randomized
@@ -77,9 +77,12 @@ class Player(pg.sprite.Sprite):
             surf.blit(self.parts[f'top_{self.tops[self.tops_idx]}_back2'])
         surf.blit(self.parts[f'body_{self.skin_colors[self.skin_colors_idx]}'])
         surf.blit(self.parts[f'socks_{self.socks[self.socks_idx]}'])
-        surf.blit(self.parts[f'bottom_{self.bottoms[self.bottoms_idx]}'])
+        if self.chests[self.chests_idx] == 'turtleneck':
+            surf.blit(self.parts[f'arm_{self.skin_colors[self.skin_colors_idx]}'])
         surf.blit(self.parts[f'chest_{self.chests[self.chests_idx]}'])
-        surf.blit(self.parts[f'arm_{self.skin_colors[self.skin_colors_idx]}'])
+        surf.blit(self.parts[f'bottom_{self.bottoms[self.bottoms_idx]}'])
+        if self.chests[self.chests_idx] != 'turtleneck':
+            surf.blit(self.parts[f'arm_{self.skin_colors[self.skin_colors_idx]}'])
         surf.blit(self.parts[f'top_{self.tops[self.tops_idx]}_front'])
         surf.blit(self.parts[f'face_purple'])
         if self.races[self.races_idx] == "cat":
