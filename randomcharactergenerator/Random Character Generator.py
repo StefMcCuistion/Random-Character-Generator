@@ -10,9 +10,13 @@ from pygame import mixer
 from os.path import join
 import os
 from os import walk
+import sys
 from sys import exit
 
-# import tkinter
+from PIL import Image
+
+import tkinter
+from tkinter import filedialog
 import ctypes
 import pywinauto
 
@@ -20,20 +24,31 @@ import pyautogui
 
 # from random import randint
 
+import webbrowser
+
 import settings
 
+def resource_path(relative_path):
+    """Get absolute path to resource, works for PyInstaller"""
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return join(base_path, relative_path)
 
 class Player(pg.sprite.Sprite):
     def __init__(self, groups, parts):
         super().__init__(groups)
         self.parts = parts
         self.skin_colors = ["fair", "pale_brown"]
-        self.races = ["human", "cat"]
+        self.races = ["human", "cat", "dragon", "bunny"]
         self.hairstyles = ["emo", "bubble_braid"]
         self.hair_colors = ["black", "blonde", "brown", "purple"]
-        self.bottoms = ["shorts", "skirt", "microkini"]
-        self.chests = ["cropped_shirt", "bra", "turtleneck", "microkini"]
-        self.tops = ["none", "jacket", "coat", "maid_dress"]
+        self.panties = ["lacy_dark", "microkini"]
+        self.bottoms = ["shorts", "skirt", "none"]
+        self.chests = ["cropped_shirt", "bra", "turtleneck", "microkini", "cropped_tank_dark", "cropped_tank_light", "bunny"]
+        self.tops = ["none", "jacket", "coat", "maid_dress", "bunny"]
         self.socks = ["none", "leggings", "thigh_highs_black"]
         
         # Index Defaults, used when not randomized
@@ -42,6 +57,7 @@ class Player(pg.sprite.Sprite):
         self.hair_colors_idx = 0
         self.races_idx = 0
         self.tops_idx = 0
+        self.panties_idx = 0
         self.bottoms_idx = 0
         self.socks_idx = 0
         self.chests_idx = 0
@@ -58,6 +74,7 @@ class Player(pg.sprite.Sprite):
         self.races_idx = randint(0, len(self.races) - 1)
         self.tops_idx = randint(0, len(self.tops) - 1)
         self.bottoms_idx = randint(0, len(self.bottoms) - 1)
+        self.panties_idx = randint(0, len(self.panties) - 1)
         self.socks_idx = randint(0, len(self.socks) - 1)
         self.chests_idx = randint(0, len(self.chests) - 1)
 
@@ -66,16 +83,25 @@ class Player(pg.sprite.Sprite):
         self.randomize_attributes()
 
         # Draws character and updates self.image
+        surf = self.return_image()
+        surf = pg.transform.scale_by(surf, .46)
+        self.image = surf
+        
+    def return_image(self):
+        # Draws character at max res and returns it
         surf = pg.Surface((1766, 2513), pg.SRCALPHA)
         if self.tops[self.tops_idx] != 'none':
             surf.blit(self.parts[f'top_{self.tops[self.tops_idx]}_back1'])
         if self.hairstyles[self.hairstyles_idx] != 'bald':
             surf.blit(self.parts[f'hair_{self.hairstyles[self.hairstyles_idx]}_{self.hair_colors[self.hair_colors_idx]}_back'])
-        if self.races[self.races_idx] == "cat":
-            surf.blit(self.parts[f'tail_cat_{self.hair_colors[self.hair_colors_idx]}'])
+        if self.races[self.races_idx] == "cat" or self.races[self.races_idx] == "bunny":
+            surf.blit(self.parts[f'tail_{self.races[self.races_idx]}_{self.hair_colors[self.hair_colors_idx]}'])
+        if self.races[self.races_idx] == "dragon":
+            surf.blit(self.parts[f'tail_{self.races[self.races_idx]}'])
         if self.tops[self.tops_idx] != 'none':
             surf.blit(self.parts[f'top_{self.tops[self.tops_idx]}_back2'])
         surf.blit(self.parts[f'body_{self.skin_colors[self.skin_colors_idx]}'])
+        surf.blit(self.parts[f'panties_{self.panties[self.panties_idx]}'])
         surf.blit(self.parts[f'socks_{self.socks[self.socks_idx]}'])
         if self.chests[self.chests_idx] == 'turtleneck':
             surf.blit(self.parts[f'arm_{self.skin_colors[self.skin_colors_idx]}'])
@@ -85,52 +111,25 @@ class Player(pg.sprite.Sprite):
             surf.blit(self.parts[f'arm_{self.skin_colors[self.skin_colors_idx]}'])
         surf.blit(self.parts[f'top_{self.tops[self.tops_idx]}_front'])
         surf.blit(self.parts[f'face_purple'])
-        if self.races[self.races_idx] == "cat":
-            surf.blit(self.parts[f'catear_back_{self.hair_colors[self.hair_colors_idx]}'])
-            surf.blit(self.parts[f'catear_under_hair_{self.hair_colors[self.hair_colors_idx]}'])
+        if self.races[self.races_idx] == "cat" or self.races[self.races_idx] == "bunny":
+            surf.blit(self.parts[f'{self.races[self.races_idx]}ear_back_{self.hair_colors[self.hair_colors_idx]}'])
+            surf.blit(self.parts[f'{self.races[self.races_idx]}ear_under_hair_{self.hair_colors[self.hair_colors_idx]}'])
+        elif self.races[self.races_idx] == "dragon":
+            surf.blit(self.parts[f'{self.races[self.races_idx]}ear_back'])
+            surf.blit(self.parts[f'{self.races[self.races_idx]}ear_under_hair'])
         else:
             surf.blit(self.parts[f'humanear_{self.skin_colors[self.skin_colors_idx]}'])
         if self.hairstyles[self.hairstyles_idx] != 'bald':
             surf.blit(self.parts[f'hair_{self.hairstyles[self.hairstyles_idx]}_{self.hair_colors[self.hair_colors_idx]}_front'])
-        if self.races[self.races_idx] == "cat":
-            surf.blit(self.parts[f'catear_front_{self.hair_colors[self.hair_colors_idx]}'])
-
-        data = pg.image.tobytes(surf, "RGBA")
-        final_surf = pg.image.frombytes(data, (1766, 2513), "RGBA")
-        final_surf = pg.transform.scale_by(final_surf, .46)
-        self.image = final_surf
-        
-    def return_image(self):
-        # Draws character at max res and returns it
-        surf = pg.Surface((1766, 2513), pg.SRCALPHA)
-        if self.tops[self.tops_idx] != 'none':
-            surf.blit(self.parts[f'top_{self.tops[self.tops_idx]}_back1'])
-        if self.hairstyles[self.hairstyles_idx] != 'bald':
-            surf.blit(self.parts[f'hair_{self.hairstyles[self.hairstyles_idx]}_{self.hair_colors[self.hair_colors_idx]}_back'])
-        if self.races[self.races_idx] == "cat":
-            surf.blit(self.parts[f'tail_cat_{self.hair_colors[self.hair_colors_idx]}'])
-        if self.tops[self.tops_idx] != 'none':
-            surf.blit(self.parts[f'top_{self.tops[self.tops_idx]}_back2'])
-        surf.blit(self.parts[f'body_{self.skin_colors[self.skin_colors_idx]}'])
-        surf.blit(self.parts[f'socks_{self.socks[self.socks_idx]}'])
-        surf.blit(self.parts[f'bottom_{self.bottoms[self.bottoms_idx]}'])
-        surf.blit(self.parts[f'chest_{self.chests[self.chests_idx]}'])
-        surf.blit(self.parts[f'arm_{self.skin_colors[self.skin_colors_idx]}'])
-        surf.blit(self.parts[f'top_{self.tops[self.tops_idx]}_front'])
-        surf.blit(self.parts[f'face_purple'])
-        if self.races[self.races_idx] == "cat":
-            surf.blit(self.parts[f'catear_back_{self.hair_colors[self.hair_colors_idx]}'])
-            surf.blit(self.parts[f'catear_under_hair_{self.hair_colors[self.hair_colors_idx]}'])
-        else:
-            surf.blit(self.parts[f'humanear_{self.skin_colors[self.skin_colors_idx]}'])
-        if self.hairstyles[self.hairstyles_idx] != 'bald':
-            surf.blit(self.parts[f'hair_{self.hairstyles[self.hairstyles_idx]}_{self.hair_colors[self.hair_colors_idx]}_front'])
-        if self.races[self.races_idx] == "cat":
-            surf.blit(self.parts[f'catear_front_{self.hair_colors[self.hair_colors_idx]}'])
+        if self.races[self.races_idx] == "cat" or self.races[self.races_idx] == "bunny":
+            surf.blit(self.parts[f'{self.races[self.races_idx]}ear_front_{self.hair_colors[self.hair_colors_idx]}'])
+        elif self.races[self.races_idx] == "dragon":
+            surf.blit(self.parts[f'{self.races[self.races_idx]}ear_front'])
 
         data = pg.image.tobytes(surf, "RGBA")
         final_surf = pg.image.frombytes(data, (1766, 2513), "RGBA")
         return final_surf
+    
 
 class Heart(pg.sprite.Sprite):
     def __init__(self, surf, pos, groups):
@@ -272,6 +271,8 @@ class Slider(pg.sprite.Sprite):
                 if mouse_x > self.bounds[0] and mouse_x < self.bounds[1]:
                     self.rect.center = (mouse_x, self.pos[1])
                 self.idx = 100 - round((self.bounds[1] - self.rect.centerx) / 6)
+                if self.idx < 5:
+                    self.idx = 0
             
     def check_for_input(self):
         pos = (pg.mouse.get_pos())
@@ -343,11 +344,14 @@ class Game:
         }
         
         try:
-            with open('user_settings.txt') as settings_file:
+            with open(resource_path(join('user settings', 'user_settings.txt'))) as settings_file:
                 self.user_settings = json.load(settings_file)
                 print(self.user_settings)
         except: 
             print('could not load user settings')
+            
+        #current_dir = os.path.dirname(os.path.abspath(__file__))
+        #asset_location = os.path.join(current_dir, "assets")
         
         ctypes.windll.user32.SetProcessDPIAware()  # keeps Windows GUI scale settings from messing with resolution
         monitor_size = pg.display.list_modes()[0]
@@ -356,8 +360,8 @@ class Game:
             self.display = pg.display.set_mode((settings.W, settings.H), pg.FULLSCREEN)
         else:
             self.display = pg.display.set_mode((settings.W, settings.H))
-        self.font = pg.font.Font(join('assets', 'motley_forces.ttf'), 90)
-        self.playscreen_button_font = pg.font.Font(join('assets', 'motley_forces.ttf'), 80)
+        self.font = pg.font.Font(resource_path(join('assets', 'motley_forces.ttf')), 90)
+        self.playscreen_button_font = pg.font.Font(resource_path(join('assets', 'motley_forces.ttf')), 80)
         pg.display.set_caption("Dress Up Game")
         if not self.fullscreen:  # These just slow down game launch if done in fullscreen
             os.environ["SDL_VIDEO_CENTERED"] = "1"  # Centers window
@@ -366,97 +370,130 @@ class Game:
         self.clock = pg.time.Clock()
         self.running = True
 
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        asset_location = os.path.join(current_dir, "assets")
+        
 
         # Imports: Cursor
-        cursor_surf = pg.image.load(join(asset_location, 'img', 'ui', 'mouse.png')).convert_alpha()
+        cursor_surf = pg.image.load(resource_path(join('assets', 'img', 'ui', 'mouse.png'))).convert_alpha()
         cursor = pg.cursors.Cursor((0,0), cursor_surf)
         pg.mouse.set_cursor(cursor)
 
         # Imports: Player
         self.player_parts = {}
-        for folder_path, sub_folders, file_names in walk(join(asset_location, "img", "player_pieces")):
+        for folder_path, sub_folders, file_names in walk(resource_path(join('assets', "img", "player_pieces"))):
             if file_names:
                 for file_name in file_names:
-                    path = join(folder_path, file_name)
+                    path = resource_path(join(folder_path, file_name))
                     surf = pg.image.load(path).convert_alpha()
                     self.player_parts[file_name.split('.')[0]] = surf
                     
         # Imports: Backgrounds
         self.background_surfs = {
-                                'halftone': pg.image.load(join('assets', 'img', 'backgrounds', 'halftone.png')).convert_alpha(),
-                                'outdoors': pg.image.load(join('assets', 'img', 'backgrounds', 'outdoors.png')).convert_alpha(),
-                                'hotel': pg.image.load(join('assets', 'img', 'backgrounds', 'hotel.png')).convert_alpha(),
-                                'piza': pg.image.load(join('assets', 'img', 'backgrounds', 'piza.png')).convert_alpha()
+                                'halftone': pg.image.load(resource_path(join('assets', 'img', 'backgrounds', 'halftone.png'))).convert_alpha(),
+                                'outdoors': pg.image.load(resource_path(join('assets', 'img', 'backgrounds', 'outdoors.png'))).convert_alpha(),
+                                'hotel': pg.image.load(resource_path(join('assets', 'img', 'backgrounds', 'hotel.png'))).convert_alpha(),
+                                'piza': pg.image.load(resource_path(join('assets', 'img', 'backgrounds', 'piza.png'))).convert_alpha()
         }
 
         # Imports: Buttons and Sliders
         self.button_surfs = {
-                             'selected': pg.image.load(join('assets', 'img', 'ui', 'button_selected.png')).convert_alpha(),
-                             'unselected': pg.image.load(join('assets', 'img', 'ui', 'button_unselected.png')).convert_alpha()
+                             'selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'button_selected.png'))).convert_alpha(),
+                             'unselected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'button_unselected.png'))).convert_alpha()
         }
         
         self.return_button_surfs = {
-                                    'selected': pg.image.load(join('assets', 'img', 'ui', 'return_button_selected.png')).convert_alpha(),
-                                    'unselected': pg.image.load(join('assets', 'img', 'ui', 'return_button_unselected.png')).convert_alpha()                                    
+                                    'selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'return_button_selected.png'))).convert_alpha(),
+                                    'unselected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'return_button_unselected.png'))).convert_alpha()                                    
         }
         
         self.slider_surfs = {
-                             'unselected': pg.image.load(join('assets', 'img', 'ui', 'slider_knob_unselected.png')).convert_alpha(),
-                             'selected': pg.image.load(join('assets', 'img', 'ui', 'slider_knob_selected.png')).convert_alpha()
+                             'unselected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'slider_knob_unselected.png'))).convert_alpha(),
+                             'selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'slider_knob_selected.png'))).convert_alpha()
         }
         
         self.checkbox_surfs = {
-                               'unselected': pg.image.load(join('assets', 'img', 'ui', 'checkbox_unchecked.png')).convert_alpha(),
-                               'unselected_hover': pg.image.load(join('assets', 'img', 'ui', 'checkbox_unchecked_hover.png')).convert_alpha(),
-                               'selected': pg.image.load(join('assets', 'img', 'ui', 'checkbox_checked.png')).convert_alpha(),
-                               'selected_hover': pg.image.load(join('assets', 'img', 'ui', 'checkbox_checked_hover.png')).convert_alpha()
+                               'unselected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'checkbox_unchecked.png'))).convert_alpha(),
+                               'unselected_hover': pg.image.load(resource_path(join('assets', 'img', 'ui', 'checkbox_unchecked_hover.png'))).convert_alpha(),
+                               'selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'checkbox_checked.png'))).convert_alpha(),
+                               'selected_hover': pg.image.load(resource_path(join('assets', 'img', 'ui', 'checkbox_checked_hover.png'))).convert_alpha()
         }
         
         self.randomize_button_surfs = {
-                                       'unselected': pg.image.load(join('assets', 'img', 'ui', 'randomize_unselected.png')).convert_alpha(),
-                                       'selected': pg.image.load(join('assets', 'img', 'ui', 'randomize_selected.png')).convert_alpha(),
-                                       'pressed': pg.image.load(join('assets', 'img', 'ui', 'randomize_pressed.png')).convert_alpha()
+                                       'unselected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'randomize_unselected.png'))).convert_alpha(),
+                                       'selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'randomize_selected.png'))).convert_alpha(),
+                                       'pressed': pg.image.load(resource_path(join('assets', 'img', 'ui', 'randomize_pressed.png'))).convert_alpha()
         }
         
         self.save_image_button_surfs = {
-                                        'unselected': pg.image.load(join('assets', 'img', 'ui', 'save_image_unselected.png')).convert_alpha(), 
-                                        'selected': pg.image.load(join('assets', 'img', 'ui', 'save_image_selected.png')).convert_alpha(),
-                                        'pressed': pg.image.load(join('assets', 'img', 'ui', 'save_image_pressed.png')).convert_alpha()
+                                        'unselected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'save_image_unselected.png'))).convert_alpha(), 
+                                        'selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'save_image_selected.png'))).convert_alpha(),
+                                        'pressed': pg.image.load(resource_path(join('assets', 'img', 'ui', 'save_image_pressed.png'))).convert_alpha()
         }
         
         self.back_button_surfs = {
-                                  'unselected': pg.image.load(join('assets', 'img', 'ui', 'back_button_unselected.png')).convert_alpha(),
-                                  'selected': pg.image.load(join('assets', 'img', 'ui', 'back_button_selected.png')).convert_alpha()
+                                  'unselected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'back_button_unselected.png'))).convert_alpha(),
+                                  'selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'back_button_selected.png'))).convert_alpha()
         }
         
         self.background_button_surfs = {
-                                        'halftone_unselected': pg.image.load(join('assets', 'img', 'ui', 'bg_halftone_button_unselected.png')).convert_alpha(),
-                                        'halftone_selected': pg.image.load(join('assets', 'img', 'ui', 'bg_halftone_button_selected.png')).convert_alpha(),
-                                        'outdoors_unselected':pg.image.load(join('assets', 'img', 'ui', 'bg_outdoors_button_unselected.png')).convert_alpha(),
-                                        'outdoors_selected':pg.image.load(join('assets', 'img', 'ui', 'bg_outdoors_button_selected.png')).convert_alpha(),
-                                        'hotel_unselected':pg.image.load(join('assets', 'img', 'ui', 'bg_hotel_button_unselected.png')).convert_alpha(),
-                                        'hotel_selected':pg.image.load(join('assets', 'img', 'ui', 'bg_hotel_button_selected.png')).convert_alpha(),
-                                        'piza_unselected':pg.image.load(join('assets', 'img', 'ui', 'bg_piza_button_unselected.png')).convert_alpha(),
-                                        'piza_selected':pg.image.load(join('assets', 'img', 'ui', 'bg_piza_button_selected.png')).convert_alpha()
+                                        'halftone_unselected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'bg_halftone_button_unselected.png'))).convert_alpha(),
+                                        'halftone_selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'bg_halftone_button_selected.png'))).convert_alpha(),
+                                        'outdoors_unselected':pg.image.load(resource_path(join('assets', 'img', 'ui', 'bg_outdoors_button_unselected.png'))).convert_alpha(),
+                                        'outdoors_selected':pg.image.load(resource_path(join('assets', 'img', 'ui', 'bg_outdoors_button_selected.png'))).convert_alpha(),
+                                        'hotel_unselected':pg.image.load(resource_path(join('assets', 'img', 'ui', 'bg_hotel_button_unselected.png'))).convert_alpha(),
+                                        'hotel_selected':pg.image.load(resource_path(join('assets', 'img', 'ui', 'bg_hotel_button_selected.png'))).convert_alpha(),
+                                        'piza_unselected':pg.image.load(resource_path(join('assets', 'img', 'ui', 'bg_piza_button_unselected.png'))).convert_alpha(),
+                                        'piza_selected':pg.image.load(resource_path(join('assets', 'img', 'ui', 'bg_piza_button_selected.png'))).convert_alpha()
         }
         
-        self.backgrounds_label_surf = pg.image.load(join('assets', 'img', 'ui', 'backgrounds_label.png')).convert_alpha()
+        self.patreon_button_surfs = {
+                                     'unselected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'socials_button_patreon_unselected.png'))).convert_alpha(),
+                                     'selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'socials_button_patreon_selected.png'))).convert_alpha(),
+        }
+        
+        self.twitter_button_surfs = {
+                                     'unselected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'socials_button_twitter_unselected.png'))).convert_alpha(),
+                                     'selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'socials_button_twitter_selected.png'))).convert_alpha(),
+        }
+        
+        self.bluesky_button_surfs = {
+                                     'unselected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'socials_button_bluesky_unselected.png'))).convert_alpha(),
+                                     'selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'socials_button_bluesky_selected.png'))).convert_alpha(),
+        }
+        
+        self.cara_button_surfs = {
+                                     'unselected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'socials_button_cara_unselected.png'))).convert_alpha(),
+                                     'selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'socials_button_cara_selected.png'))).convert_alpha(),
+        }
+        
+        self.tumblr_button_surfs = {
+                                     'unselected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'socials_button_tumblr_unselected.png'))).convert_alpha(),
+                                     'selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'socials_button_tumblr_selected.png'))).convert_alpha(),
+        }
+        
+        self.nsfw_button_surfs = {
+                                     'unselected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'socials_button_18_unselected.png'))).convert_alpha(),
+                                     'selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'socials_button_18_selected.png'))).convert_alpha(),
+        }
+        
+        self.backgrounds_label_surf = pg.image.load(resource_path(join('assets', 'img', 'ui', 'backgrounds_label.png'))).convert_alpha()
         
         # Imports: Background Hearts
-        self.heart_surf = pg.image.load(join(asset_location, 'img', 'ui', 'heart.png')).convert_alpha()
+        self.heart_surf = pg.image.load(resource_path(join('assets', 'img', 'ui', 'heart.png'))).convert_alpha()
         
         # Imports: Audio
         
-        pg.mixer.music.load(join('assets', 'audio', '90s_Bodybuilding_Music_by_Aries_Beats.mp3'))
+        pg.mixer.music.load(resource_path(join('assets', 'audio', '90s_Bodybuilding_Music_by_Aries_Beats.mp3')))
         
-        self.sfx_button_click = pg.mixer.Sound(join('assets', 'audio', 'sfx', 'Minimalist3.ogg'))
-        self.sfx_save_image = pg.mixer.Sound(join('assets', 'audio', 'sfx', 'Minimalist13.ogg'))
-        self.sfx_randomize = pg.mixer.Sound(join('assets', 'audio', 'sfx', 'Minimalist9.ogg'))
+        self.sfx_button_click = pg.mixer.Sound(resource_path(join('assets', 'audio', 'sfx', 'Minimalist3.ogg')))
+        self.sfx_save_image = pg.mixer.Sound(resource_path(join('assets', 'audio', 'sfx', 'Minimalist13.ogg')))
+        self.sfx_randomize = pg.mixer.Sound(resource_path(join('assets', 'audio', 'sfx', 'Minimalist9.ogg')))
         self.sfx_button_click.set_volume((self.user_settings['Master Volume'] / 100) * (self.user_settings['SFX Volume'] / 100))
         self.sfx_save_image.set_volume((self.user_settings['Master Volume'] / 100) * (self.user_settings['SFX Volume'] / 100))
         self.sfx_randomize.set_volume((self.user_settings['Master Volume'] / 100) * (self.user_settings['SFX Volume'] / 100))
+        
+        # Imports: Icon
+        
+        icon = pg.image.load(resource_path(join('assets', 'img', 'ui', 'icon.png'))).convert_alpha()
 
         # Sprite groups
         self.start_sprites = pg.sprite.Group()
@@ -470,6 +507,17 @@ class Game:
         pg.mixer.music.set_volume(music_volume)
         pg.mixer.music.play(loops = -1)
         
+        pg.display.set_icon(icon)
+        
+    def save_image(self, img):
+        path = filedialog.asksaveasfilename(defaultextension=".png")
+        if path is None:
+            return
+        img_file = Image.open(img, 'r')
+        img_file.save(path)
+        img_file.close
+
+        
 
     def start(self):
 
@@ -479,7 +527,7 @@ class Game:
         about_button = Button(self.start_sprites, 'about', self.button_surfs, (1495, 660), self.font, 'light')
         close_button = Button(self.start_sprites, 'close', self.button_surfs, (1495, 845), self.font, 'light')
 
-        menu_box = pg.image.load(join('assets', 'img', 'ui', 'start_menu_box.png')).convert_alpha()
+        menu_box = pg.image.load(resource_path(join('assets', 'img', 'ui', 'start_menu_box.png'))).convert_alpha()
 
         # Custom heart event
         self.background_hearts = pg.sprite.Group()
@@ -537,7 +585,7 @@ class Game:
     def options(self):
                 
         # Sprites
-        options_bg = pg.image.load(join('assets', 'img', 'ui', 'options_background.png')).convert_alpha()
+        options_bg = pg.image.load(resource_path(join('assets', 'img', 'ui', 'options_background.png'))).convert_alpha()
         
         return_button = Button(self.options_sprites, 'return to main menu', self.return_button_surfs, (settings.W / 2, 965), self.font, 'dark')
         
@@ -559,7 +607,7 @@ class Game:
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if return_button.check_for_input():
                         self.sfx_button_click.play()
-                        with open('user_settings.txt', 'w') as settings_file:
+                        with open((resource_path(join('user settings', 'user_settings.txt'))), 'w') as settings_file:
                             json.dump(self.user_settings, settings_file)
                         for sprite in self.options_sprites:
                             sprite.kill()
@@ -601,6 +649,14 @@ class Game:
         
         # Sprites
         about_bg = self.background_surfs['halftone']
+        about_box = pg.image.load(resource_path(join('assets', 'img', 'ui', 'about_box.png'))).convert_alpha()
+        
+        patreon_button = Button(self.about_sprites, '', self.patreon_button_surfs, (125, 750), self.font, 'dark')
+        twitter_button = Button(self.about_sprites, '', self.twitter_button_surfs, (275, 750), self.font, 'dark')
+        bluesky_button = Button(self.about_sprites, '', self.bluesky_button_surfs, (425, 750), self.font, 'dark')
+        cara_button = Button(self.about_sprites, '', self.cara_button_surfs, (575, 750), self.font, 'dark')
+        tumblr_button = Button(self.about_sprites, '', self.tumblr_button_surfs, (725, 750), self.font, 'dark')
+        nsfw_button = Button(self.about_sprites, '', self.nsfw_button_surfs, (875, 750), self.font, 'dark')
         
         return_button = Button(self.about_sprites, 'return to main menu', self.return_button_surfs, (settings.W / 2, 965), self.font, 'dark')
                         
@@ -615,6 +671,18 @@ class Game:
                     if event.key == pg.K_ESCAPE:
                         self.running = False
                 if event.type == pg.MOUSEBUTTONDOWN:
+                    if patreon_button.check_for_input():
+                        webbrowser.open('https://www.patreon.com/c/stekken')
+                    if twitter_button.check_for_input():
+                        webbrowser.open('https://x.com/stekken_')
+                    if bluesky_button.check_for_input():
+                        webbrowser.open('https://bsky.app/profile/stekken.bsky.social')
+                    if cara_button.check_for_input():
+                        webbrowser.open('https://cara.app/stekken/all')
+                    if tumblr_button.check_for_input():
+                        webbrowser.open('https://www.tumblr.com/blog/stekken')
+                    if nsfw_button.check_for_input():
+                        webbrowser.open('https://linktr.ee/stekkennsfw')
                     if return_button.check_for_input():
                         self.sfx_button_click.play()
                         for sprite in self.about_sprites:
@@ -623,6 +691,7 @@ class Game:
             
             # Render
             self.display.blit(about_bg)
+            self.display.blit(about_box)
             self.about_sprites.draw(self.display)
             self.about_sprites.update(self.display)
             pg.display.flip()
@@ -634,15 +703,17 @@ class Game:
 
         # Sprites
         self.player = Player(self.play_sprites, self.player_parts)
-        play_bg = pg.image.load(join('assets', 'img', 'ui', 'halftone_bg.png')).convert_alpha()
-        randomize_button = Button(self.play_sprites, 'randomize', self.randomize_button_surfs, (470, 260), self.playscreen_button_font, 'light')
-        save_image_button = Button(self.play_sprites, 'save image', self.save_image_button_surfs, (495, 465), self.playscreen_button_font, 'light')
-        back_button = Button(self.play_sprites, 'main menu', self.back_button_surfs, (312, 955), self.playscreen_button_font, 'light')
+        
+        play_bg = pg.image.load(resource_path(join('assets', 'img', 'ui', 'halftone_bg.png'))).convert_alpha()
         backgrounds_label = BackgroundsLabel(self.play_sprites, self.backgrounds_label_surf, (245, 675))
         halftone_bg_button = BackgroundsButton(self.play_sprites, 'halftone', 'selected', self.background_button_surfs, (450, 675))
         outdoors_bg_button = BackgroundsButton(self.play_sprites, 'outdoors', 'unselected', self.background_button_surfs, (550, 675))
         hotel_bg_button = BackgroundsButton(self.play_sprites, 'hotel', 'unselected', self.background_button_surfs, (650, 675))
         piza_bg_button = BackgroundsButton(self.play_sprites, 'piza', 'unselected', self.background_button_surfs, (750, 675))
+        
+        randomize_button = Button(self.play_sprites, 'randomize', self.randomize_button_surfs, (470, 260), self.playscreen_button_font, 'light')
+        save_image_button = Button(self.play_sprites, 'save image', self.save_image_button_surfs, (495, 465), self.playscreen_button_font, 'light')
+        back_button = Button(self.play_sprites, 'main menu', self.back_button_surfs, (312, 955), self.playscreen_button_font, 'light')
 
         # Loop
         while self.running:
@@ -672,11 +743,14 @@ class Game:
                         bg = piza_bg_button.name
                     elif save_image_button.check_for_input():
                         self.sfx_save_image.play()
-                        now = str(datetime.datetime.now())
-                        print(f'original = {now}')
-                        now_formatted = now.replace(' ', '.').replace(':', '.').replace('-', '.')
-                        print('new = ', now_formatted)
-                        pg.image.save(self.player.return_image(), join('your images', f'{now_formatted}.png'))
+                        #now = str(datetime.datetime.now())
+                        #print(f'original = {now}')
+                        #now_formatted = now.replace(' ', '.').replace(':', '.').replace('-', '.')
+                        #print('new = ', now_formatted)
+                        image_path = resource_path(join('user image', 'latest_user_image.png'))
+                        pg.image.save(self.player.return_image(), image_path)
+                        self.save_image(image_path)
+                        #webbrowser.open(image_path)
                     elif back_button.check_for_input():
                         self.sfx_button_click.play()
                         for sprite in self.play_sprites:

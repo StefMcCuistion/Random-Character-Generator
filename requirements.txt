@@ -4,3 +4,4 @@ pyautogui
 black
 flake8
 datetime
+Pillow
