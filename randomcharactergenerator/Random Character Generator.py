@@ -22,6 +22,8 @@ import pywinauto
 
 import pyautogui
 
+import numpy
+
 # from random import randint
 
 import webbrowser
@@ -130,6 +132,21 @@ class Player(pg.sprite.Sprite):
         final_surf = pg.image.frombytes(data, (1766, 2513), "RGBA")
         return final_surf
     
+class SplashArt(pg.sprite.Sprite):
+    def __init__(self, groups, surf, pos):
+        super().__init__(groups)
+        self.og_img = surf
+        self.image = self.og_img
+        self.pos = pos
+        self.rect = self.image.get_frect(center = pos)
+        self.size = 1
+        self.tick = 1
+        
+    def update(self, dt):
+        self.tick += 1 * dt
+        self.size = 1 + (.1 * numpy.sin(self.tick))
+        self.image = pg.transform.scale_by(self.og_img, self.size)
+        self.rect = self.image.get_frect(center = self.rect.center)
 
 class Heart(pg.sprite.Sprite):
     def __init__(self, surf, pos, groups):
@@ -497,6 +514,7 @@ class Game:
 
         # Sprite groups
         self.start_sprites = pg.sprite.Group()
+        self.time_sensitive_start_sprites = pg.sprite.Group()
         self.play_sprites = pg.sprite.Group()
         self.about_sprites = pg.sprite.Group()
         self.options_sprites = pg.sprite.Group()
@@ -513,6 +531,9 @@ class Game:
     def start(self):
 
         # Sprites
+        splash_art_surf = pg.image.load(resource_path(join('assets', 'img', 'ui', 'splash_art_placeholder.png'))).convert_alpha()
+        self.splash_art = SplashArt(self.time_sensitive_start_sprites, splash_art_surf, (600, 550))
+        
         start_button = Button(self.start_sprites, 'start', self.button_surfs, (1495, 290), self.font, 'light')
         options_button = Button(self.start_sprites, 'options', self.button_surfs, (1495, 475), self.font, 'light')
         about_button = Button(self.start_sprites, 'about', self.button_surfs, (1495, 660), self.font, 'light')
@@ -521,13 +542,12 @@ class Game:
         menu_box = pg.image.load(resource_path(join('assets', 'img', 'ui', 'start_menu_box.png'))).convert_alpha()
 
         # Custom heart event
-        self.background_hearts = pg.sprite.Group()
         heart_event = pg.event.custom_type()
         pg.time.set_timer(heart_event, 1000)
         
         for i in range(0, 2):
             x, y = randint(265, settings.W - 265), 0
-            Heart(self.heart_surf, (x, y), self.background_hearts)
+            Heart(self.heart_surf, (x, y), self.time_sensitive_start_sprites)
 
         # Loop
         while self.running:
@@ -538,7 +558,7 @@ class Game:
                     self.running = False
                 if event.type == heart_event:
                     x, y = randint(0, settings.W), randint(-300, -221)
-                    Heart(self.heart_surf, (x, y), self.background_hearts)
+                    Heart(self.heart_surf, (x, y), self.time_sensitive_start_sprites)
                 if event.type == pg.KEYDOWN:
                     if event.key == pg.K_ESCAPE:
                         self.running = False
@@ -547,15 +567,21 @@ class Game:
                         self.sfx_button_click.play()
                         for sprite in self.start_sprites:
                             sprite.kill()
+                        for sprite in self.time_sensitive_start_sprites:
+                            sprite.kill()
                         self.play()
                     elif options_button.check_for_input():
                         self.sfx_button_click.play()
                         for sprite in self.start_sprites:
                             sprite.kill()
+                        for sprite in self.time_sensitive_start_sprites:
+                            sprite.kill()
                         self.options()
                     elif about_button.check_for_input():
                         self.sfx_button_click.play()
                         for sprite in self.start_sprites:
+                            sprite.kill()
+                        for sprite in self.time_sensitive_start_sprites:
                             sprite.kill()
                         self.about()
                     elif close_button.check_for_input():
@@ -564,8 +590,8 @@ class Game:
 
             # Render
             self.display.fill('#ffe3f8')
-            self.background_hearts.update(self.dt)
-            self.background_hearts.draw(self.display)
+            self.time_sensitive_start_sprites.update(self.dt)
+            self.time_sensitive_start_sprites.draw(self.display)
             self.display.blit(menu_box)
             self.start_sprites.draw(self.display)
             self.start_sprites.update(self.display)
@@ -694,7 +720,7 @@ class Game:
 
         # Sprites
         self.player = Player(self.play_sprites, self.player_parts)
-        
+                
         play_bg = pg.image.load(resource_path(join('assets', 'img', 'ui', 'halftone_bg.png'))).convert_alpha()
         backgrounds_label = BackgroundsLabel(self.play_sprites, self.backgrounds_label_surf, (245, 675))
         halftone_bg_button = BackgroundsButton(self.play_sprites, 'halftone', 'selected', self.background_button_surfs, (450, 675))
@@ -735,7 +761,8 @@ class Game:
                     elif save_image_button.check_for_input():
                         self.sfx_save_image.play()
                         path = filedialog.asksaveasfilename(defaultextension=".png")
-                        pg.image.save(self.player.return_image(), path)
+                        if path != "":
+                            pg.image.save(self.player.return_image(), path)
                     elif back_button.check_for_input():
                         self.sfx_button_click.play()
                         for sprite in self.play_sprites:
