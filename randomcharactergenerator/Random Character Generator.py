@@ -508,16 +508,7 @@ class Game:
         pg.mixer.music.play(loops = -1)
         
         pg.display.set_icon(icon)
-        
-    def save_image(self, img):
-        path = filedialog.asksaveasfilename(defaultextension=".png")
-        if path is None:
-            return
-        img_file = Image.open(img, 'r')
-        img_file.save(path)
-        img_file.close
-
-        
+                
 
     def start(self):
 
@@ -743,14 +734,8 @@ class Game:
                         bg = piza_bg_button.name
                     elif save_image_button.check_for_input():
                         self.sfx_save_image.play()
-                        #now = str(datetime.datetime.now())
-                        #print(f'original = {now}')
-                        #now_formatted = now.replace(' ', '.').replace(':', '.').replace('-', '.')
-                        #print('new = ', now_formatted)
-                        image_path = resource_path(join('user image', 'latest_user_image.png'))
-                        pg.image.save(self.player.return_image(), image_path)
-                        self.save_image(image_path)
-                        #webbrowser.open(image_path)
+                        path = filedialog.asksaveasfilename(defaultextension=".png")
+                        pg.image.save(self.player.return_image(), path)
                     elif back_button.check_for_input():
                         self.sfx_button_click.play()
                         for sprite in self.play_sprites:
