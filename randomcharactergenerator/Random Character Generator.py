@@ -67,9 +67,22 @@ class Player(pg.sprite.Sprite):
         self.eye_colors_idx = 0
         
         self.change_appearance()
+        self.image = self.appearance
         self.rect = self.image.get_frect(topleft=(settings.W * .5, settings.H * -.045))
+        
+        # Animation
+        self.tick = 1
+        self.h = 2513 * .46
+        self.w = 1766* .46
 
-
+    def update(self, dt):
+        self.tick += 1 * dt
+        speed = 1
+        magnitude = 30
+        self.h = 2513 + (numpy.sin(speed * self.tick) * magnitude * .8)
+        self.w = 1766 - (numpy.sin(speed * self.tick) * magnitude)
+        self.image = pg.transform.smoothscale(self.appearance, (self.w * .46, self.h * .46))
+        self.rect = self.image.get_frect(bottom = self.rect.bottom, center = self.rect.center)
 
     def randomize_attributes(self):
         self.skin_colors_idx = randint(0, len(self.skin_colors) - 1)
@@ -90,7 +103,7 @@ class Player(pg.sprite.Sprite):
         # Draws character and updates self.image
         surf = self.return_image()
         surf = pg.transform.scale_by(surf, .46)
-        self.image = surf
+        self.appearance = surf
         
     def return_image(self):
         # Draws character at max res and returns it
@@ -526,7 +539,7 @@ class Game:
 
         # Sprite groups
         self.start_sprites = pg.sprite.Group()
-        self.time_sensitive_start_sprites = pg.sprite.Group()
+        self.time_sensitive_sprites = pg.sprite.Group()
         self.play_sprites = pg.sprite.Group()
         self.about_sprites = pg.sprite.Group()
         self.options_sprites = pg.sprite.Group()
@@ -544,7 +557,7 @@ class Game:
 
         # Sprites
         splash_art_surf = pg.image.load(resource_path(join('assets', 'img', 'ui', 'splash_art_placeholder.png'))).convert_alpha()
-        self.splash_art = SplashArt(self.time_sensitive_start_sprites, splash_art_surf, (600, 550))
+        self.splash_art = SplashArt(self.time_sensitive_sprites, splash_art_surf, (600, 550))
         
         start_button = Button(self.start_sprites, 'start', self.button_surfs, (1495, 290), self.font, 'light')
         options_button = Button(self.start_sprites, 'options', self.button_surfs, (1495, 475), self.font, 'light')
@@ -559,7 +572,7 @@ class Game:
         
         for i in range(0, 2):
             x, y = randint(265, settings.W - 265), 0
-            Heart(self.heart_surf, (x, y), self.time_sensitive_start_sprites)
+            Heart(self.heart_surf, (x, y), self.time_sensitive_sprites)
 
         # Loop
         while self.running:
@@ -570,7 +583,7 @@ class Game:
                     self.running = False
                 if event.type == heart_event:
                     x, y = randint(0, settings.W), randint(-300, -221)
-                    Heart(self.heart_surf, (x, y), self.time_sensitive_start_sprites)
+                    Heart(self.heart_surf, (x, y), self.time_sensitive_sprites)
                 if event.type == pg.KEYDOWN:
                     if event.key == pg.K_ESCAPE:
                         self.running = False
@@ -579,21 +592,21 @@ class Game:
                         self.sfx_button_click.play()
                         for sprite in self.start_sprites:
                             sprite.kill()
-                        for sprite in self.time_sensitive_start_sprites:
+                        for sprite in self.time_sensitive_sprites:
                             sprite.kill()
                         self.play()
                     elif options_button.check_for_input():
                         self.sfx_button_click.play()
                         for sprite in self.start_sprites:
                             sprite.kill()
-                        for sprite in self.time_sensitive_start_sprites:
+                        for sprite in self.time_sensitive_sprites:
                             sprite.kill()
                         self.options()
                     elif about_button.check_for_input():
                         self.sfx_button_click.play()
                         for sprite in self.start_sprites:
                             sprite.kill()
-                        for sprite in self.time_sensitive_start_sprites:
+                        for sprite in self.time_sensitive_sprites:
                             sprite.kill()
                         self.about()
                     elif close_button.check_for_input():
@@ -602,8 +615,8 @@ class Game:
 
             # Render
             self.display.fill('#ffe3f8')
-            self.time_sensitive_start_sprites.update(self.dt)
-            self.time_sensitive_start_sprites.draw(self.display)
+            self.time_sensitive_sprites.update(self.dt)
+            self.time_sensitive_sprites.draw(self.display)
             self.display.blit(menu_box)
             self.start_sprites.draw(self.display)
             self.start_sprites.update(self.display)
@@ -731,7 +744,7 @@ class Game:
         bg = 'halftone'
 
         # Sprites
-        self.player = Player(self.play_sprites, self.player_parts)
+        self.player = Player(self.time_sensitive_sprites, self.player_parts)
                 
         play_bg = pg.image.load(resource_path(join('assets', 'img', 'ui', 'halftone_bg.png'))).convert_alpha()
         backgrounds_label = BackgroundsLabel(self.play_sprites, self.backgrounds_label_surf, (245, 675))
@@ -779,6 +792,8 @@ class Game:
                         self.sfx_button_click.play()
                         for sprite in self.play_sprites:
                             sprite.kill()
+                        for sprite in self.time_sensitive_sprites:
+                            sprite.kill()
                         self.start()
                     halftone_bg_button.change_appearance(bg)
                     outdoors_bg_button.change_appearance(bg)
@@ -790,6 +805,8 @@ class Game:
             self.display.blit(self.background_surfs[bg])
             self.play_sprites.draw(self.display)
             self.play_sprites.update(self.display)
+            self.time_sensitive_sprites.draw(self.display)
+            self.time_sensitive_sprites.update(self.dt)
             pg.display.flip()
 
         pg.quit()
