@@ -43,15 +43,16 @@ class Player(pg.sprite.Sprite):
     def __init__(self, groups, parts):
         super().__init__(groups)
         self.parts = parts
-        self.skin_colors = ["fair", "pale_brown"]
-        self.races = ["human", "cat", "dragon", "bunny"]
+        self.skin_colors = ["fair", "less_fair", "pale_brown", "medium_brown", "dark_brown", "black"]
+        self.races = ["human", "cat", "dragon"]
         self.hairstyles = ["emo", "bubble_braid"]
-        self.hair_colors = ["black", "blonde", "brown", "purple"]
+        self.hair_colors = ["black", "blonde", "brown", "purple", "white"]
         self.panties = ["lacy_dark", "microkini"]
         self.bottoms = ["shorts", "skirt", "none"]
         self.chests = ["cropped_shirt", "bra", "turtleneck", "microkini", "cropped_tank_dark", "cropped_tank_light", "bunny"]
-        self.tops = ["none", "jacket", "coat", "maid_dress", "bunny"]
-        self.socks = ["none", "leggings", "thigh_highs_black"]
+        self.tops = ["none", "jacket", "coat", "maid_dress", "bunny", "cropped_hoodie", "colored_cropped_hoodie"]
+        self.socks = ["none", "leggings", "thigh_highs_black", "fishnet"]
+        self.eye_colors = ["purple", "red", "blue", "green", "brown"]
         
         # Index Defaults, used when not randomized
         self.skin_colors_idx = 0
@@ -63,6 +64,7 @@ class Player(pg.sprite.Sprite):
         self.bottoms_idx = 0
         self.socks_idx = 0
         self.chests_idx = 0
+        self.eye_colors_idx = 0
         
         self.change_appearance()
         self.rect = self.image.get_frect(topleft=(settings.W * .5, settings.H * -.045))
@@ -79,6 +81,7 @@ class Player(pg.sprite.Sprite):
         self.panties_idx = randint(0, len(self.panties) - 1)
         self.socks_idx = randint(0, len(self.socks) - 1)
         self.chests_idx = randint(0, len(self.chests) - 1)
+        self.eye_colors_idx = randint(0, len(self.eye_colors) - 1)
 
     def change_appearance(self):
 
@@ -93,7 +96,10 @@ class Player(pg.sprite.Sprite):
         # Draws character at max res and returns it
         surf = pg.Surface((1766, 2513), pg.SRCALPHA)
         if self.tops[self.tops_idx] != 'none':
-            surf.blit(self.parts[f'top_{self.tops[self.tops_idx]}_back1'])
+            if self.tops[self.tops_idx] == "colored_cropped_hoodie":
+                surf.blit(self.parts[f'top_{self.eye_colors[self.eye_colors_idx]}_{self.tops[self.tops_idx]}_back1'])
+            else:
+                surf.blit(self.parts[f'top_{self.tops[self.tops_idx]}_back1'])
         if self.hairstyles[self.hairstyles_idx] != 'bald':
             surf.blit(self.parts[f'hair_{self.hairstyles[self.hairstyles_idx]}_{self.hair_colors[self.hair_colors_idx]}_back'])
         if self.races[self.races_idx] == "cat" or self.races[self.races_idx] == "bunny":
@@ -101,7 +107,10 @@ class Player(pg.sprite.Sprite):
         if self.races[self.races_idx] == "dragon":
             surf.blit(self.parts[f'tail_{self.races[self.races_idx]}'])
         if self.tops[self.tops_idx] != 'none':
-            surf.blit(self.parts[f'top_{self.tops[self.tops_idx]}_back2'])
+            if self.tops[self.tops_idx] == "colored_cropped_hoodie":
+                surf.blit(self.parts[f'top_{self.eye_colors[self.eye_colors_idx]}_{self.tops[self.tops_idx]}_back2'])
+            else:
+                surf.blit(self.parts[f'top_{self.tops[self.tops_idx]}_back2'])
         surf.blit(self.parts[f'body_{self.skin_colors[self.skin_colors_idx]}'])
         surf.blit(self.parts[f'panties_{self.panties[self.panties_idx]}'])
         surf.blit(self.parts[f'socks_{self.socks[self.socks_idx]}'])
@@ -111,8 +120,11 @@ class Player(pg.sprite.Sprite):
         surf.blit(self.parts[f'bottom_{self.bottoms[self.bottoms_idx]}'])
         if self.chests[self.chests_idx] != 'turtleneck':
             surf.blit(self.parts[f'arm_{self.skin_colors[self.skin_colors_idx]}'])
-        surf.blit(self.parts[f'top_{self.tops[self.tops_idx]}_front'])
-        surf.blit(self.parts[f'face_purple'])
+        if self.tops[self.tops_idx] == "colored_cropped_hoodie":
+            surf.blit(self.parts[f'top_{self.eye_colors[self.eye_colors_idx]}_{self.tops[self.tops_idx]}_front'])
+        else:
+            surf.blit(self.parts[f'top_{self.tops[self.tops_idx]}_front'])
+        surf.blit(self.parts[f'face_{self.eye_colors[self.eye_colors_idx]}'])
         if self.races[self.races_idx] == "cat" or self.races[self.races_idx] == "bunny":
             surf.blit(self.parts[f'{self.races[self.races_idx]}ear_back_{self.hair_colors[self.hair_colors_idx]}'])
             surf.blit(self.parts[f'{self.races[self.races_idx]}ear_under_hair_{self.hair_colors[self.hair_colors_idx]}'])
@@ -499,7 +511,7 @@ class Game:
         
         # Imports: Audio
         
-        pg.mixer.music.load(resource_path(join('assets', 'audio', '90s_Bodybuilding_Music_by_Aries_Beats.mp3')))
+        pg.mixer.music.load(resource_path(join('assets', 'audio', 'synthlofibeats-onetent.mp3')))
         
         self.sfx_button_click = pg.mixer.Sound(resource_path(join('assets', 'audio', 'sfx', 'Minimalist3.ogg')))
         self.sfx_save_image = pg.mixer.Sound(resource_path(join('assets', 'audio', 'sfx', 'Minimalist13.ogg')))
