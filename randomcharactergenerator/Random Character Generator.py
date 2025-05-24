@@ -42,14 +42,16 @@ def resource_path(relative_path):
 class Player(pg.sprite.Sprite):
     def __init__(self, groups, parts):
         super().__init__(groups)
+        # Apperance options
         self.parts = parts
         self.skin_colors = ["fair", "less_fair", "pale_brown", "medium_brown", "dark_brown", "black"]
         self.races = ["human", "cat", "dragon"]
         self.hairstyles = ["emo", "bubble_braid"]
         self.hair_colors = ["black", "blonde", "brown", "purple", "white"]
         self.panties = ["lacy_dark", "microkini"]
-        self.bottoms = ["shorts", "skirt", "none"]
-        self.chests = ["cropped_shirt", "bra", "turtleneck", "microkini", "cropped_tank_dark", "cropped_tank_light", "bunny"]
+        self.bottoms = [ "none", "shorts", "skirt", "skirt_dark","jeans"]
+        self.bras = ["microkini", "bra", "turtleneck", "bunny"]
+        self.chests = ["none", "cropped_shirt", "cropped_tank_dark", "cropped_tank_light"]
         self.tops = ["none", "jacket", "coat", "maid_dress", "bunny", "cropped_hoodie", "colored_cropped_hoodie"]
         self.socks = ["none", "leggings", "thigh_highs_black", "fishnet"]
         self.eye_colors = ["purple", "red", "blue", "green", "brown"]
@@ -61,12 +63,16 @@ class Player(pg.sprite.Sprite):
         self.races_idx = 0
         self.tops_idx = 0
         self.panties_idx = 0
+        self.bras_idx = 0
         self.bottoms_idx = 0
         self.socks_idx = 0
         self.chests_idx = 0
         self.eye_colors_idx = 0
         
-        self.change_appearance()
+        # Initial appearance as question mark
+        surf = self.parts['question_mark']
+        surf = pg.transform.scale_by(surf, .46)
+        self.appearance = surf
         self.image = self.appearance
         self.rect = self.image.get_frect(topleft=(settings.W * .5, settings.H * -.045))
         
@@ -79,10 +85,10 @@ class Player(pg.sprite.Sprite):
         self.tick += 1 * dt
         speed = 1
         magnitude = 30
-        self.h = 2513 + (numpy.sin(speed * self.tick) * magnitude * .8)
+        self.h = 2513 + (numpy.sin(speed * self.tick) * magnitude * .5)
         self.w = 1766 - (numpy.sin(speed * self.tick) * magnitude)
         self.image = pg.transform.smoothscale(self.appearance, (self.w * .46, self.h * .46))
-        self.rect = self.image.get_frect(bottom = self.rect.bottom, center = self.rect.center)
+        self.rect = self.image.get_frect(bottom = self.rect.bottom, centerx = self.rect.centerx)
 
     def randomize_attributes(self):
         self.skin_colors_idx = randint(0, len(self.skin_colors) - 1)
@@ -127,12 +133,10 @@ class Player(pg.sprite.Sprite):
         surf.blit(self.parts[f'body_{self.skin_colors[self.skin_colors_idx]}'])
         surf.blit(self.parts[f'panties_{self.panties[self.panties_idx]}'])
         surf.blit(self.parts[f'socks_{self.socks[self.socks_idx]}'])
-        if self.chests[self.chests_idx] == 'turtleneck':
-            surf.blit(self.parts[f'arm_{self.skin_colors[self.skin_colors_idx]}'])
-        surf.blit(self.parts[f'chest_{self.chests[self.chests_idx]}'])
+        surf.blit(self.parts[f'chest_{self.bras[self.bras_idx]}'])
         surf.blit(self.parts[f'bottom_{self.bottoms[self.bottoms_idx]}'])
-        if self.chests[self.chests_idx] != 'turtleneck':
-            surf.blit(self.parts[f'arm_{self.skin_colors[self.skin_colors_idx]}'])
+        surf.blit(self.parts[f'arm_{self.skin_colors[self.skin_colors_idx]}'])
+        surf.blit(self.parts[f'chest_{self.chests[self.chests_idx]}'])
         if self.tops[self.tops_idx] == "colored_cropped_hoodie":
             surf.blit(self.parts[f'top_{self.eye_colors[self.eye_colors_idx]}_{self.tops[self.tops_idx]}_front'])
         else:
@@ -169,8 +173,10 @@ class SplashArt(pg.sprite.Sprite):
         
     def update(self, dt):
         self.tick += 1 * dt
-        self.size = 1 + (.1 * numpy.sin(self.tick))
-        self.image = pg.transform.scale_by(self.og_img, self.size)
+        speed = .8
+        magnitude = .05
+        self.size = 1 + (magnitude * numpy.sin(self.tick * speed))
+        self.image = pg.transform.smoothscale_by(self.og_img, self.size)
         self.rect = self.image.get_frect(center = self.rect.center)
 
 class Heart(pg.sprite.Sprite):
@@ -386,7 +392,7 @@ class Game:
         }
         
         try:
-            with open(resource_path(join('user settings', 'user_settings.txt'))) as settings_file:
+            with open(resource_path(join('user settings', 'user_settings.csv'))) as settings_file:
                 self.user_settings = json.load(settings_file)
                 print(self.user_settings)
         except: 
@@ -402,8 +408,8 @@ class Game:
             self.display = pg.display.set_mode((settings.W, settings.H), pg.FULLSCREEN)
         else:
             self.display = pg.display.set_mode((settings.W, settings.H))
-        self.font = pg.font.Font(resource_path(join('assets', 'motley_forces.ttf')), 90)
-        self.playscreen_button_font = pg.font.Font(resource_path(join('assets', 'motley_forces.ttf')), 80)
+        self.font = pg.font.Font(resource_path(join('assets', 'fonts', 'motley_forces.ttf')), 90)
+        self.playscreen_button_font = pg.font.Font(resource_path(join('assets', 'fonts', 'motley_forces.ttf')), 80)
         pg.display.set_caption("Dress Up Game")
         if not self.fullscreen:  # These just slow down game launch if done in fullscreen
             os.environ["SDL_VIDEO_CENTERED"] = "1"  # Centers window
@@ -543,6 +549,7 @@ class Game:
         self.play_sprites = pg.sprite.Group()
         self.about_sprites = pg.sprite.Group()
         self.options_sprites = pg.sprite.Group()
+        self.splash_art_group = pg.sprite.Group()
         
         # Play music
         
@@ -557,7 +564,7 @@ class Game:
 
         # Sprites
         splash_art_surf = pg.image.load(resource_path(join('assets', 'img', 'ui', 'splash_art_placeholder.png'))).convert_alpha()
-        self.splash_art = SplashArt(self.time_sensitive_sprites, splash_art_surf, (600, 550))
+        self.splash_art = SplashArt(self.splash_art_group, splash_art_surf, (600, 500))
         
         start_button = Button(self.start_sprites, 'start', self.button_surfs, (1495, 290), self.font, 'light')
         options_button = Button(self.start_sprites, 'options', self.button_surfs, (1495, 475), self.font, 'light')
@@ -594,6 +601,8 @@ class Game:
                             sprite.kill()
                         for sprite in self.time_sensitive_sprites:
                             sprite.kill()
+                        for sprite in self.splash_art_group:
+                            sprite.kill()
                         self.play()
                     elif options_button.check_for_input():
                         self.sfx_button_click.play()
@@ -601,12 +610,16 @@ class Game:
                             sprite.kill()
                         for sprite in self.time_sensitive_sprites:
                             sprite.kill()
+                        for sprite in self.splash_art_group:
+                            sprite.kill()
                         self.options()
                     elif about_button.check_for_input():
                         self.sfx_button_click.play()
                         for sprite in self.start_sprites:
                             sprite.kill()
                         for sprite in self.time_sensitive_sprites:
+                            sprite.kill()
+                        for sprite in self.splash_art_group:
                             sprite.kill()
                         self.about()
                     elif close_button.check_for_input():
@@ -617,6 +630,8 @@ class Game:
             self.display.fill('#ffe3f8')
             self.time_sensitive_sprites.update(self.dt)
             self.time_sensitive_sprites.draw(self.display)
+            self.splash_art_group.update(self.dt)
+            self.splash_art_group.draw(self.display)
             self.display.blit(menu_box)
             self.start_sprites.draw(self.display)
             self.start_sprites.update(self.display)
@@ -649,7 +664,7 @@ class Game:
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if return_button.check_for_input():
                         self.sfx_button_click.play()
-                        with open((resource_path(join('user settings', 'user_settings.txt'))), 'w') as settings_file:
+                        with open((resource_path(join('user settings', 'user_settings.csv'))), 'w') as settings_file:
                             json.dump(self.user_settings, settings_file)
                         for sprite in self.options_sprites:
                             sprite.kill()
