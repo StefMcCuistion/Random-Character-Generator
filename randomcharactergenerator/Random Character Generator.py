@@ -47,11 +47,11 @@ class Player(pg.sprite.Sprite):
         self.skin_colors = ["fair", "less_fair", "pale_brown", "medium_brown", "dark_brown", "black"]
         self.races = ["human", "cat", "dragon"]
         self.hairstyles = ["emo", "bubble_braid"]
-        self.hair_colors = ["black", "blonde", "brown", "purple", "white"]
+        self.hair_colors = ["black", "blonde", "brown", "purple", "white", "pink1", "pink2"]
         self.panties = ["lacy_dark", "microkini"]
         self.bottoms = [ "none", "shorts", "skirt", "skirt_dark","jeans"]
         self.bras = ["microkini", "bra", "turtleneck", "bunny"]
-        self.chests = ["none", "cropped_shirt", "cropped_tank_dark", "cropped_tank_light"]
+        self.chests = ["none", "cropped_tank_dark", "cropped_tank_light", "cropped_shirt"]
         self.tops = ["none", "jacket", "coat", "maid_dress", "bunny", "cropped_hoodie", "colored_cropped_hoodie"]
         self.socks = ["none", "leggings", "thigh_highs_black", "fishnet"]
         self.eye_colors = ["purple", "red", "blue", "green", "brown"]
@@ -101,6 +101,11 @@ class Player(pg.sprite.Sprite):
         self.socks_idx = randint(0, len(self.socks) - 1)
         self.chests_idx = randint(0, len(self.chests) - 1)
         self.eye_colors_idx = randint(0, len(self.eye_colors) - 1)
+        # Prevents cropped shirt from being selected if a cropped hoodie is selected. 
+        if self.chests[self.chests_idx] == "cropped_shirt":
+            if self.tops[self.tops_idx] == "cropped_hoodie" or self.tops[self.tops_idx] == "colored_cropped_hoodie":
+                self.chests_idx = randint(0, len(self.chests) - 2)
+            
 
     def change_appearance(self):
 
