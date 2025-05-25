@@ -74,21 +74,43 @@ class Player(pg.sprite.Sprite):
         surf = pg.transform.scale_by(surf, .46)
         self.appearance = surf
         self.image = self.appearance
-        self.rect = self.image.get_frect(topleft=(settings.W * .5, settings.H * -.045))
+        self.rect = self.image.get_frect(center=(1300, 550))
+        self.initial_center_y = self.rect.centery
+        self.zoom_rect = self.rect
         
         # Animation
         self.tick = 1
         self.h = 2513 * .46
         self.w = 1766* .46
+        self.breathing = False
+        
+        self.twitch_time_remaining = 0
+        self.twitch_h = 1
+        self.twitch_w = 1
+        self.twitch_magnitude = .1
 
-    def update(self, dt):
+    def update(self, dt, zoom):
         self.tick += 1 * dt
+        if self.twitch_time_remaining > 0:
+            # Track time
+            self.twitch_time_remaining -= .04
+            self.twitch_time_remaining = round(self.twitch_time_remaining, 2)
+            # Change self.twitch_h and self.twitch_w to animate
+            self.twitch_h = 1 + numpy.sin(6.28319 * self.twitch_time_remaining) * self.twitch_time_remaining * self.twitch_magnitude
+            self.twitch_h = 1 - numpy.sin(6.28319 * self.twitch_time_remaining) * self.twitch_time_remaining * self.twitch_magnitude
+            
         speed = 1
-        magnitude = 30
-        self.h = 2513 + (numpy.sin(speed * self.tick) * magnitude * .5)
-        self.w = 1766 - (numpy.sin(speed * self.tick) * magnitude)
-        self.image = pg.transform.smoothscale(self.appearance, (self.w * .46, self.h * .46))
-        self.rect = self.image.get_frect(bottom = self.rect.bottom, centerx = self.rect.centerx)
+        magnitude = 10
+        if self.breathing:
+            img_x = 1766 * .46
+            img_y = 2513 * .46
+            self.w = img_x * self.twitch_w * (.7 + (.004 * zoom))
+            self.h = img_y * self.twitch_h * (.7 + (.004 * zoom))
+            self.zoom_rect = pg.transform.smoothscale(self.appearance, (self.w, self.h)).get_frect(center = self.zoom_rect.center)
+            self.w -= numpy.sin(speed * self.tick) * magnitude
+            self.h += numpy.sin(speed * self.tick) * magnitude * .5
+            self.image = pg.transform.smoothscale(self.appearance, (self.w, self.h))
+            self.rect = self.image.get_frect(centerx = self.rect.centerx, bottom = self.zoom_rect.bottom)
 
     def randomize_attributes(self):
         self.skin_colors_idx = randint(0, len(self.skin_colors) - 1)
@@ -112,9 +134,11 @@ class Player(pg.sprite.Sprite):
         self.randomize_attributes()
 
         # Draws character and updates self.image
+        self.breathing = True
         surf = self.return_image()
         surf = pg.transform.scale_by(surf, .46)
         self.appearance = surf
+        self.twitch_time_remaining = 1
         
     def return_image(self):
         # Draws character at max res and returns it
@@ -289,19 +313,29 @@ class BackgroundsButton(pg.sprite.Sprite):
 
 
 class Slider(pg.sprite.Sprite):
-    def __init__(self, groups, surfs, pos, user_settings, name):
+    def __init__(self, groups, surfs, pos, user_settings, name, axis):
         super().__init__(groups)
         self.pos = pos
+        self.initial_pos = pos
         self.surfs = surfs
         self.selected = False
         self.in_use = False
         self.image = self.surfs['unselected']
         self.rect = self.image.get_frect(center = self.pos)
-        self.bounds = (self.rect.centerx - 600, self.rect.centerx)
-        self.name = name
+        self.axis = axis
         self.user_settings = user_settings
-        self.idx = int(self.user_settings[name])
-        self.rect.centerx += (self.idx * 6) - 600
+        if self.axis == 'x':
+            self.length = 6
+            self.bounds = (self.rect.centerx - (100 * self.length), self.rect.centerx)
+            self.idx = int(self.user_settings[name])
+            self.rect.centerx += (self.idx * self.length) - (100 * self.length)
+        else:
+            self.length = 4
+            self.bounds = (self.rect.centery - (100 * self.length), self.rect.centery)
+            self.idx = 70
+            self.rect.centery -= self.idx * self.length
+        self.name = name
+        
         
     def update(self, display):
         if not self.in_use:
@@ -320,12 +354,24 @@ class Slider(pg.sprite.Sprite):
             if not pg.mouse.get_pressed()[0]:
                 self.in_use = False
             else: 
-                mouse_x = pg.mouse.get_pos()[0]
-                if mouse_x > self.bounds[0] and mouse_x < self.bounds[1]:
-                    self.rect.center = (mouse_x, self.pos[1])
-                self.idx = 100 - round((self.bounds[1] - self.rect.centerx) / 6)
-                if self.idx < 5:
-                    self.idx = 0
+                if self.axis == 'x':
+                    mouse_x = pg.mouse.get_pos()[0]
+                    if mouse_x > self.bounds[0] and mouse_x < self.bounds[1]:
+                        self.rect.center = (mouse_x, self.pos[1])
+                    elif mouse_x < self.bounds[0]:
+                        self.rect.centerx = self.initial_pos[0] - (100 * self.length)
+                    else:
+                        self.rect.centerx = self.initial_pos[0]
+                    self.idx = 100 - round((self.bounds[1] - self.rect.centerx) / self.length)
+                else:
+                    mouse_y = pg.mouse.get_pos()[1]
+                    if mouse_y > self.bounds[0] and mouse_y < self.bounds[1]:
+                        self.rect.center = (self.pos[0], mouse_y)
+                    elif mouse_y < self.bounds[0]:
+                        self.rect.centery = self.initial_pos[1] - (self.length * 100)
+                    else: 
+                        self.rect.centery = self.initial_pos[1]
+                    self.idx = round((self.bounds[1] - self.rect.centery) / self.length)
             
     def check_for_input(self):
         pos = (pg.mouse.get_pos())
@@ -463,6 +509,11 @@ class Game:
                              'selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'slider_knob_selected.png'))).convert_alpha()
         }
         
+        self.zoom_slider_surfs = {
+                             'unselected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'zoom_slider_knob_unselected.png'))).convert_alpha(),
+                             'selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'slider_knob_selected.png'))).convert_alpha()
+        }
+        
         self.checkbox_surfs = {
                                'unselected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'checkbox_unchecked.png'))).convert_alpha(),
                                'unselected_hover': pg.image.load(resource_path(join('assets', 'img', 'ui', 'checkbox_unchecked_hover.png'))).convert_alpha(),
@@ -528,7 +579,7 @@ class Game:
                                      'selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'socials_button_18_selected.png'))).convert_alpha(),
         }
         
-        self.backgrounds_label_surf = pg.image.load(resource_path(join('assets', 'img', 'ui', 'backgrounds_label.png'))).convert_alpha()
+        self.backgrounds_label_surf = pg.image.load(resource_path(join('assets', 'img', 'ui', 'play_screen_unresponsive_ui.png'))).convert_alpha()
         
         # Imports: Background Hearts
         self.heart_surf = pg.image.load(resource_path(join('assets', 'img', 'ui', 'heart.png'))).convert_alpha()
@@ -652,9 +703,9 @@ class Game:
         return_button = Button(self.options_sprites, 'return to main menu', self.return_button_surfs, (settings.W / 2, 965), self.font, 'dark')
         
         fullscreen_checkbox = Checkbox(self.options_sprites, self.checkbox_surfs, (1480, 260), self.user_settings, "Fullscreen")
-        master_volume_slider = Slider(self.options_sprites, self.slider_surfs, (1750, 430), self.user_settings, "Master Volume")
-        music_volume_slider = Slider(self.options_sprites, self.slider_surfs, (1750, 610), self.user_settings, "Music Volume")
-        sfx_volume_slider = Slider(self.options_sprites, self.slider_surfs, (1750, 790), self.user_settings, "SFX Volume")
+        master_volume_slider = Slider(self.options_sprites, self.slider_surfs, (1750, 430), self.user_settings, "Master Volume", "x")
+        music_volume_slider = Slider(self.options_sprites, self.slider_surfs, (1750, 610), self.user_settings, "Music Volume", "x")
+        sfx_volume_slider = Slider(self.options_sprites, self.slider_surfs, (1750, 790), self.user_settings, "SFX Volume", "x")
                 
         # Loop
         while self.running:
@@ -767,7 +818,7 @@ class Game:
         self.player = Player(self.time_sensitive_sprites, self.player_parts)
                 
         play_bg = pg.image.load(resource_path(join('assets', 'img', 'ui', 'halftone_bg.png'))).convert_alpha()
-        backgrounds_label = BackgroundsLabel(self.play_sprites, self.backgrounds_label_surf, (245, 675))
+        backgrounds_label = BackgroundsLabel(self.play_sprites, self.backgrounds_label_surf, (settings.W / 2, settings.H / 2))
         halftone_bg_button = BackgroundsButton(self.play_sprites, 'halftone', 'selected', self.background_button_surfs, (450, 675))
         outdoors_bg_button = BackgroundsButton(self.play_sprites, 'outdoors', 'unselected', self.background_button_surfs, (550, 675))
         hotel_bg_button = BackgroundsButton(self.play_sprites, 'hotel', 'unselected', self.background_button_surfs, (650, 675))
@@ -775,7 +826,9 @@ class Game:
         
         randomize_button = Button(self.play_sprites, 'randomize', self.randomize_button_surfs, (470, 260), self.playscreen_button_font, 'light')
         save_image_button = Button(self.play_sprites, 'save image', self.save_image_button_surfs, (495, 465), self.playscreen_button_font, 'light')
-        back_button = Button(self.play_sprites, 'main menu', self.back_button_surfs, (312, 955), self.playscreen_button_font, 'light')
+        back_button = Button(self.play_sprites, 'main menu', self.back_button_surfs, (450, 890), self.playscreen_button_font, 'light')
+        
+        zoom_slider = Slider(self.play_sprites, self.zoom_slider_surfs, (1810, 725), self.user_settings, 'zoom', 'y')
 
         # Loop
         while self.running:
@@ -820,13 +873,14 @@ class Game:
                     hotel_bg_button.change_appearance(bg)
                     piza_bg_button.change_appearance(bg)
 
-                        
+            zoom = zoom_slider.give_idx()
+            
             # Render
             self.display.blit(self.background_surfs[bg])
             self.play_sprites.draw(self.display)
             self.play_sprites.update(self.display)
             self.time_sensitive_sprites.draw(self.display)
-            self.time_sensitive_sprites.update(self.dt)
+            self.time_sensitive_sprites.update(self.dt, zoom)
             pg.display.flip()
 
         pg.quit()
