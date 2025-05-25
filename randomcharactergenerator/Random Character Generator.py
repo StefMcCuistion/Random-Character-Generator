@@ -456,7 +456,7 @@ class Game:
         monitor_size = pg.display.list_modes()[0]
         self.fullscreen = self.user_settings['Fullscreen']
         if self.fullscreen:
-            self.display = pg.display.set_mode((settings.W, settings.H), pg.FULLSCREEN)
+            self.display = pg.display.set_mode((settings.W, settings.H), pg.SCALED | pg.FULLSCREEN)
         else:
             self.display = pg.display.set_mode((settings.W, settings.H))
         self.font = pg.font.Font(resource_path(join('assets', 'fonts', 'motley_forces.ttf')), 90)
@@ -730,7 +730,7 @@ class Game:
                         self.sfx_button_click.play()
                     self.fullscreen = self.user_settings['Fullscreen']
                     if self.fullscreen:
-                        self.display = pg.display.set_mode((settings.W, settings.H), pg.FULLSCREEN)
+                        self.display = pg.display.set_mode((settings.W, settings.H), pg.SCALED | pg.FULLSCREEN)
                     else:
                         self.display = pg.display.set_mode((settings.W, settings.H))
 
