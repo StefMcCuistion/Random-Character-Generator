@@ -736,17 +736,18 @@ class Game:
 
             
             # Update User Settings
-            self.user_settings['Fullscreen'] = fullscreen_checkbox.give_state()
-            self.user_settings['Master Volume'] = master_volume_slider.give_idx()
-            self.user_settings['Music Volume'] = music_volume_slider.give_idx()
-            self.user_settings['SFX Volume'] = sfx_volume_slider.give_idx()
-            music_volume = (self.user_settings['Master Volume'] / 100) * (self.user_settings['Music Volume'] / 100)
-            sfx_volume = (self.user_settings['Master Volume'] / 100) * (self.user_settings['SFX Volume'] /100)
-            self.sfx_randomize.set_volume((self.user_settings['Master Volume'] / 100) * (self.user_settings['SFX Volume'] / 100))
+            if pg.mouse.get_pressed()[0]:
+                self.user_settings['Fullscreen'] = fullscreen_checkbox.give_state()
+                self.user_settings['Master Volume'] = master_volume_slider.give_idx()
+                self.user_settings['Music Volume'] = music_volume_slider.give_idx()
+                self.user_settings['SFX Volume'] = sfx_volume_slider.give_idx()
+                music_volume = (self.user_settings['Master Volume'] / 100) * (self.user_settings['Music Volume'] / 100)
+                sfx_volume = (self.user_settings['Master Volume'] / 100) * (self.user_settings['SFX Volume'] / 100)
 
             pg.mixer.music.set_volume(music_volume)
             self.sfx_button_click.set_volume(sfx_volume)
             self.sfx_save_image.set_volume(sfx_volume)
+            self.sfx_randomize.set_volume(sfx_volume)
             print(self.user_settings)
 
 
