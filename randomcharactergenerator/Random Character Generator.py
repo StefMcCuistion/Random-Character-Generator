@@ -591,9 +591,11 @@ class Game:
         self.sfx_button_click = pg.mixer.Sound(resource_path(join('assets', 'audio', 'sfx', 'Minimalist3.ogg')))
         self.sfx_save_image = pg.mixer.Sound(resource_path(join('assets', 'audio', 'sfx', 'Minimalist13.ogg')))
         self.sfx_randomize = pg.mixer.Sound(resource_path(join('assets', 'audio', 'sfx', 'Minimalist9.ogg')))
+        self.sfx_invalid = pg.mixer.Sound(resource_path(join('assets', 'audio', 'sfx', 'Invalid.mp3')))
         self.sfx_button_click.set_volume((self.user_settings['Master Volume'] / 100) * (self.user_settings['SFX Volume'] / 100))
         self.sfx_save_image.set_volume((self.user_settings['Master Volume'] / 100) * (self.user_settings['SFX Volume'] / 100))
         self.sfx_randomize.set_volume((self.user_settings['Master Volume'] / 100) * (self.user_settings['SFX Volume'] / 100))
+        self.sfx_invalid.set_volume((self.user_settings['Master Volume'] / 100) * (self.user_settings['SFX Volume'] / 100))
         
         # Imports: Icon
         
@@ -750,6 +752,7 @@ class Game:
             self.sfx_button_click.set_volume(sfx_volume)
             self.sfx_save_image.set_volume(sfx_volume)
             self.sfx_randomize.set_volume(sfx_volume)
+            self.sfx_invalid.set_volume(sfx_volume)
             print(self.user_settings)
 
 
@@ -859,10 +862,13 @@ class Game:
                         self.sfx_button_click.play()
                         bg = piza_bg_button.name
                     elif save_image_button.check_for_input():
-                        self.sfx_save_image.play()
-                        path = filedialog.asksaveasfilename(defaultextension=".png")
-                        if path != "":
-                            pg.image.save(self.player.return_image(), path)
+                        if self.player.breathing:
+                            self.sfx_save_image.play()
+                            path = filedialog.asksaveasfilename(defaultextension=".png")
+                            if path != "":
+                                pg.image.save(self.player.return_image(), path)
+                        else:
+                            self.sfx_invalid.play()
                     elif back_button.check_for_input():
                         self.sfx_button_click.play()
                         for sprite in self.play_sprites:
