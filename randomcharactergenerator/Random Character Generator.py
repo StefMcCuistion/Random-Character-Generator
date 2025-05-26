@@ -876,10 +876,12 @@ class Game:
                         for sprite in self.time_sensitive_sprites:
                             sprite.kill()
                         self.start()
-                    halftone_bg_button.change_appearance(bg)
-                    outdoors_bg_button.change_appearance(bg)
-                    hotel_bg_button.change_appearance(bg)
-                    piza_bg_button.change_appearance(bg)
+                if event.type == pg.MOUSEBUTTONUP and zoom_slider.in_use:
+                    self.sfx_button_click.play()
+                halftone_bg_button.change_appearance(bg)
+                outdoors_bg_button.change_appearance(bg)
+                hotel_bg_button.change_appearance(bg)
+                piza_bg_button.change_appearance(bg)
 
             zoom = zoom_slider.give_idx()
             
