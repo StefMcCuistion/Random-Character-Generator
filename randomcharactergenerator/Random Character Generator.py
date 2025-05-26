@@ -728,11 +728,13 @@ class Game:
                 if event.type == pg.MOUSEBUTTONUP:
                     if sfx_volume_slider.in_use or music_volume_slider.in_use or master_volume_slider.in_use:
                         self.sfx_button_click.play()
+                    prior_fullscreen = self.fullscreen
                     self.fullscreen = self.user_settings['Fullscreen']
-                    if self.fullscreen:
-                        self.display = pg.display.set_mode((settings.W, settings.H), pg.SCALED | pg.FULLSCREEN)
-                    else:
-                        self.display = pg.display.set_mode((settings.W, settings.H))
+                    if prior_fullscreen != self.fullscreen:
+                        if self.fullscreen:
+                            self.display = pg.display.set_mode((settings.W, settings.H), pg.SCALED | pg.FULLSCREEN)
+                        else:
+                            self.display = pg.display.set_mode((settings.W, settings.H))
 
             
             # Update User Settings
@@ -765,12 +767,12 @@ class Game:
         about_bg = self.background_surfs['halftone']
         about_box = pg.image.load(resource_path(join('assets', 'img', 'ui', 'about_box.png'))).convert_alpha()
         
-        patreon_button = Button(self.about_sprites, '', self.patreon_button_surfs, (125, 750), self.font, 'dark')
-        twitter_button = Button(self.about_sprites, '', self.twitter_button_surfs, (275, 750), self.font, 'dark')
-        bluesky_button = Button(self.about_sprites, '', self.bluesky_button_surfs, (425, 750), self.font, 'dark')
-        cara_button = Button(self.about_sprites, '', self.cara_button_surfs, (575, 750), self.font, 'dark')
-        tumblr_button = Button(self.about_sprites, '', self.tumblr_button_surfs, (725, 750), self.font, 'dark')
-        nsfw_button = Button(self.about_sprites, '', self.nsfw_button_surfs, (875, 750), self.font, 'dark')
+        patreon_button = Button(self.about_sprites, '', self.patreon_button_surfs, (580, 760), self.font, 'dark')
+        twitter_button = Button(self.about_sprites, '', self.twitter_button_surfs, (710, 760), self.font, 'dark')
+        bluesky_button = Button(self.about_sprites, '', self.bluesky_button_surfs, (840, 760), self.font, 'dark')
+        cara_button = Button(self.about_sprites, '', self.cara_button_surfs, (970, 760), self.font, 'dark')
+        tumblr_button = Button(self.about_sprites, '', self.tumblr_button_surfs, (1100, 760), self.font, 'dark')
+        nsfw_button = Button(self.about_sprites, '', self.nsfw_button_surfs, (1230, 760), self.font, 'dark')
         
         return_button = Button(self.about_sprites, 'return to main menu', self.return_button_surfs, (settings.W / 2, 965), self.font, 'dark')
                         
