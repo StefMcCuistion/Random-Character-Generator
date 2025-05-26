@@ -80,8 +80,8 @@ class Player(pg.sprite.Sprite):
         
         # Animation
         self.tick = 1
-        self.h = 2513 * .46
-        self.w = 1766* .46
+        self.h = 2513
+        self.w = 1766
         self.breathing = False
         
         self.twitch_time_remaining = 0
@@ -102,10 +102,10 @@ class Player(pg.sprite.Sprite):
         speed = 1
         magnitude = 10
         if self.breathing:
-            img_x = 1766 * .46
-            img_y = 2513 * .46
-            self.w = img_x * self.twitch_w * (.7 + (.004 * zoom))
-            self.h = img_y * self.twitch_h * (.7 + (.004 * zoom))
+            img_x = 1766
+            img_y = 2513
+            self.w = img_x * self.twitch_w * (.322 + (.0018 * zoom))
+            self.h = img_y * self.twitch_h * (.322 + (.0018 * zoom))
             self.zoom_rect = pg.transform.smoothscale(self.appearance, (self.w, self.h)).get_frect(center = self.zoom_rect.center)
             self.w -= numpy.sin(speed * self.tick) * magnitude
             self.h += numpy.sin(speed * self.tick) * magnitude * .5
@@ -136,7 +136,7 @@ class Player(pg.sprite.Sprite):
         # Draws character and updates self.image
         self.breathing = True
         surf = self.return_image()
-        surf = pg.transform.scale_by(surf, .46)
+        #surf = pg.transform.scale_by(surf)
         self.appearance = surf
         self.twitch_time_remaining = 1
         
