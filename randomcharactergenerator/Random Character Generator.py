@@ -820,7 +820,6 @@ class Game:
         # Sprites
         self.player = Player(self.time_sensitive_sprites, self.player_parts)
                 
-        play_bg = pg.image.load(resource_path(join('assets', 'img', 'ui', 'halftone_bg.png'))).convert_alpha()
         backgrounds_label = BackgroundsLabel(self.play_sprites, self.backgrounds_label_surf, (settings.W / 2, settings.H / 2))
         halftone_bg_button = BackgroundsButton(self.play_sprites, 'halftone', 'selected', self.background_button_surfs, (450, 675))
         outdoors_bg_button = BackgroundsButton(self.play_sprites, 'outdoors', 'unselected', self.background_button_surfs, (550, 675))
