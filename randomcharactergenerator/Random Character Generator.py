@@ -753,8 +753,6 @@ class Game:
             self.sfx_save_image.set_volume(sfx_volume)
             self.sfx_randomize.set_volume(sfx_volume)
             self.sfx_invalid.set_volume(sfx_volume)
-            print(self.user_settings)
-
 
             # Render
             self.display.blit(options_bg)
