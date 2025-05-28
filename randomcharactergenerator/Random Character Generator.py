@@ -461,10 +461,10 @@ class Game:
             self.display = pg.display.set_mode((settings.W, settings.H))
         self.font = pg.font.Font(resource_path(join('assets', 'fonts', 'motley_forces.ttf')), 90)
         self.playscreen_button_font = pg.font.Font(resource_path(join('assets', 'fonts', 'motley_forces.ttf')), 80)
-        pg.display.set_caption("Dress Up Game")
+        pg.display.set_caption("Random Character Generator")
         if not self.fullscreen:  # These just slow down game launch if done in fullscreen
             os.environ["SDL_VIDEO_CENTERED"] = "1"  # Centers window
-            # app = pywinauto.Application().connect(title_re="Dress Up Game")
+            # app = pywinauto.Application().connect(title_re="Random Character Generator")
             # app.top_window().set_focus() # Activates window
         self.clock = pg.time.Clock()
         self.running = True
