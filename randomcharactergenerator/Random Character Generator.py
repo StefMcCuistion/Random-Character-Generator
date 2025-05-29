@@ -71,7 +71,7 @@ class Player(pg.sprite.Sprite):
         
         # Initial appearance as question mark
         surf = self.parts['question_mark']
-        surf = pg.transform.scale_by(surf, .46)
+        surf = pg.transform.scale_by(surf, .9)
         self.appearance = surf
         self.image = self.appearance
         self.rect = self.image.get_frect(center=(1300, 550))
@@ -80,8 +80,8 @@ class Player(pg.sprite.Sprite):
         
         # Animation
         self.tick = 1
-        self.h = 2513
-        self.w = 1766
+        self.h = 1508
+        self.w = 1060
         self.breathing = False
         
         self.twitch_time_remaining = 0
@@ -99,16 +99,16 @@ class Player(pg.sprite.Sprite):
             self.twitch_h = 1 + numpy.sin(6.28319 * self.twitch_time_remaining) * self.twitch_time_remaining * self.twitch_magnitude
             self.twitch_h = 1 - numpy.sin(6.28319 * self.twitch_time_remaining) * self.twitch_time_remaining * self.twitch_magnitude
             
-        speed = 1
-        magnitude = 10
+        breathing_speed = 1
+        breathing_magnitude = 10
         if self.breathing:
-            img_x = 1766
-            img_y = 2513
-            self.w = img_x * self.twitch_w * (.322 + (.0018 * zoom))
-            self.h = img_y * self.twitch_h * (.322 + (.0018 * zoom))
-            self.zoom_rect = pg.transform.smoothscale(self.appearance, (self.w, self.h)).get_frect(center = self.zoom_rect.center)
-            self.w -= numpy.sin(speed * self.tick) * magnitude
-            self.h += numpy.sin(speed * self.tick) * magnitude * .5
+            img_x = 1060
+            img_y = 1508
+            self.w = img_x * self.twitch_w * (.55 + (.003 * zoom))
+            self.h = img_y * self.twitch_h * (.55 + (.003 * zoom))
+            self.zoom_rect = pg.transform.scale(self.appearance, (self.w, self.h)).get_frect(center = self.zoom_rect.center)
+            self.w -= numpy.sin(breathing_speed * self.tick) * breathing_magnitude
+            self.h += numpy.sin(breathing_speed * self.tick) * breathing_magnitude * .5
             self.image = pg.transform.smoothscale(self.appearance, (self.w, self.h))
             self.rect = self.image.get_frect(centerx = self.rect.centerx, bottom = self.zoom_rect.bottom)
 
@@ -142,7 +142,7 @@ class Player(pg.sprite.Sprite):
         
     def return_image(self):
         # Draws character at max res and returns it
-        surf = pg.Surface((1766, 2513), pg.SRCALPHA)
+        surf = pg.Surface((1060, 1508), pg.SRCALPHA)
         if self.tops[self.tops_idx] != 'none':
             if self.tops[self.tops_idx] == "colored_cropped_hoodie":
                 surf.blit(self.parts[f'top_{self.eye_colors[self.eye_colors_idx]}_{self.tops[self.tops_idx]}_back1'])
@@ -187,7 +187,7 @@ class Player(pg.sprite.Sprite):
             surf.blit(self.parts[f'{self.races[self.races_idx]}ear_front'])
 
         data = pg.image.tobytes(surf, "RGBA")
-        final_surf = pg.image.frombytes(data, (1766, 2513), "RGBA")
+        final_surf = pg.image.frombytes(data, (1060, 1508), "RGBA")
         return final_surf
     
 class SplashArt(pg.sprite.Sprite):
@@ -370,7 +370,9 @@ class Slider(pg.sprite.Sprite):
                         self.rect.centery = self.initial_pos[1] - (self.length * 100)
                     else: 
                         self.rect.centery = self.initial_pos[1]
-                    self.idx = round((self.bounds[1] - self.rect.centery) / self.length)
+                    idx_candidate = round((self.bounds[1] - self.rect.centery) / self.length)
+                    if abs(idx_candidate - self.idx) < 70:
+                        self.idx = round((self.bounds[1] - self.rect.centery) / self.length)
             
     def check_for_input(self):
         pos = (pg.mouse.get_pos())
@@ -440,14 +442,9 @@ class Background(pg.sprite.Sprite):
         
     def zoom(self, zoom_idx, bg_img):
         self.size = 1 + ((zoom_idx / 100) / 20)
-        print(f'size = {self.size}')
-        print(f'zoom = {zoom_idx}')
-
         self.image = pg.transform.smoothscale_by(self.surf, self.size)
         self.rect = self.image.get_frect(center = self.rect.center)
-        
-        print(f'rectleft = {self.rect.left}\nrectbottom = {self.rect.bottom}')
-        
+                
     def change_appearance(self, bg_img):
         self.surf = self.surfs[bg_img]
         self.image = pg.transform.smoothscale_by(self.surf, self.size)
