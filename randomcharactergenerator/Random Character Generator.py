@@ -331,7 +331,7 @@ class Slider(pg.sprite.Sprite):
         else:
             self.length = 4
             self.bounds = (self.rect.centery - (100 * self.length), self.rect.centery)
-            self.idx = 70
+            self.idx = self.user_settings["Zoom"]
             self.rect.centery -= self.idx * self.length
         self.name = name
         
@@ -462,10 +462,12 @@ class Game:
         pg.mixer.init()
         
         self.user_settings = {
-                              "Fullscreen": False,
+                              "Fullscreen": True,
                               "Master Volume": 100,
                               "Music Volume": 100,
-                              "SFX Volume": 100
+                              "SFX Volume": 100,
+                              "Zoom": 85,
+                              "Background": "halftone"
         }
         
         try:
@@ -642,6 +644,7 @@ class Game:
         pg.mixer.music.play(loops = -1)
         
         pg.display.set_icon(icon)
+        
                 
 
     def start(self):
@@ -842,7 +845,7 @@ class Game:
 
     def play(self):
         
-        bg_img = 'halftone'
+        bg_img = self.user_settings["Background"]
 
         # Sprites
         background = Background(self.play_sprites, self.background_surfs)
@@ -898,6 +901,10 @@ class Game:
                         else:
                             self.sfx_invalid.play()
                     elif back_button.check_for_input():
+                        self.user_settings["Zoom"] = zoom_slider.give_idx()
+                        self.user_settings["Background"] = bg_img
+                        with open((resource_path(join('user settings', 'user_settings.csv'))), 'w') as settings_file:
+                            json.dump(self.user_settings, settings_file)
                         self.sfx_button_click.play()
                         for sprite in self.play_sprites:
                             sprite.kill()
