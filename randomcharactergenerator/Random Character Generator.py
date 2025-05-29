@@ -425,6 +425,36 @@ class StaticUI(pg.sprite.Sprite):
         self.pos = pos
         self.rect = self.image.get_frect(center=self.pos)
 
+class Background(pg.sprite.Sprite):
+    def __init__(self, groups, surfs):
+        super().__init__(groups)
+        self.surfs = surfs
+        self.surf = self.surfs['halftone']
+        self.size = 1 + ((85 / 100) / 20)
+        self.image = pg.transform.smoothscale_by(self.surf, self.size)
+        self.rect = self.image.get_frect(center = (settings.W / 2, settings.H / 2))
+
+
+    def update(self, dt):
+        x = 1
+        
+    def zoom(self, zoom_idx, bg_img):
+        self.size = 1 + ((zoom_idx / 100) / 20)
+        print(f'size = {self.size}')
+        print(f'zoom = {zoom_idx}')
+
+        self.image = pg.transform.smoothscale_by(self.surf, self.size)
+        self.rect = self.image.get_frect(center = self.rect.center)
+        
+        print(f'rectleft = {self.rect.left}\nrectbottom = {self.rect.bottom}')
+        
+    def change_appearance(self, bg_img):
+        self.surf = self.surfs[bg_img]
+        self.image = pg.transform.smoothscale_by(self.surf, self.size)
+        self.rect = self.image.get_frect(center = self.rect.center)
+        
+    
+
 class Game:
 
     def __init__(self):
@@ -815,9 +845,11 @@ class Game:
 
     def play(self):
         
-        bg = 'halftone'
+        bg_img = 'halftone'
 
         # Sprites
+        background = Background(self.play_sprites, self.background_surfs)
+        
         self.player = Player(self.time_sensitive_sprites, self.player_parts)
                 
         backgrounds_label = StaticUI(self.play_sprites, self.backgrounds_label_surf, (settings.W / 2, settings.H / 2))
@@ -835,6 +867,8 @@ class Game:
         # Loop
         while self.running:
             self.dt = self.clock.tick() / 1000
+            self.display.fill('black')
+            zoom_idx = zoom_slider.give_idx()
             # Event loop
             for event in pg.event.get():
                 if event.type == pg.QUIT:
@@ -848,16 +882,16 @@ class Game:
                         self.player.change_appearance()
                     elif halftone_bg_button.check_for_input():
                         self.sfx_button_click.play()
-                        bg = halftone_bg_button.name
+                        bg_img = halftone_bg_button.name
                     elif outdoors_bg_button.check_for_input():
                         self.sfx_button_click.play()
-                        bg = outdoors_bg_button.name
+                        bg_img = outdoors_bg_button.name
                     elif hotel_bg_button.check_for_input():
                         self.sfx_button_click.play()
-                        bg = hotel_bg_button.name
+                        bg_img = hotel_bg_button.name
                     elif piza_bg_button.check_for_input():
                         self.sfx_button_click.play()
-                        bg = piza_bg_button.name
+                        bg_img = piza_bg_button.name
                     elif save_image_button.check_for_input():
                         if self.player.breathing:
                             self.sfx_save_image.play()
@@ -875,19 +909,23 @@ class Game:
                         self.start()
                 if event.type == pg.MOUSEBUTTONUP and zoom_slider.in_use:
                     self.sfx_button_click.play()
-                halftone_bg_button.change_appearance(bg)
-                outdoors_bg_button.change_appearance(bg)
-                hotel_bg_button.change_appearance(bg)
-                piza_bg_button.change_appearance(bg)
-
-            zoom = zoom_slider.give_idx()
+                
+            if zoom_slider.in_use:
+                background.zoom(zoom_idx, bg_img)
             
             # Render
-            self.display.blit(self.background_surfs[bg])
+            halftone_bg_button.change_appearance(bg_img)
+            outdoors_bg_button.change_appearance(bg_img)
+            hotel_bg_button.change_appearance(bg_img)
+            piza_bg_button.change_appearance(bg_img)
+            
+            #self.display.blit(self.background_surfs[bg_img])
+            background.change_appearance(bg_img)
+            
             self.play_sprites.draw(self.display)
             self.play_sprites.update(self.display)
             self.time_sensitive_sprites.draw(self.display)
-            self.time_sensitive_sprites.update(self.dt, zoom)
+            self.time_sensitive_sprites.update(self.dt, zoom_idx)
             pg.display.flip()
 
         pg.quit()
