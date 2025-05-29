@@ -5,3 +5,6 @@ black
 flake8
 datetime
 Pillow
+numpy
+pyinstaller
+auto-py-to-exe

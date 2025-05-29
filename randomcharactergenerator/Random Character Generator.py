@@ -311,7 +311,6 @@ class BackgroundsButton(pg.sprite.Sprite):
         if pos[0] in (range(int(self.rect.left), int(self.rect.right))) and pos[1] in range(int(self.rect.top), int(self.rect.bottom)) and pg.mouse.get_just_pressed()[0]:
             return 1
 
-
 class Slider(pg.sprite.Sprite):
     def __init__(self, groups, surfs, pos, user_settings, name, axis):
         super().__init__(groups)
