@@ -442,12 +442,12 @@ class Background(pg.sprite.Sprite):
         
     def zoom(self, zoom_idx, bg_img):
         self.size = 1 + ((zoom_idx / 100) / 20)
-        self.image = pg.transform.smoothscale_by(self.surf, self.size)
+        self.image = pg.transform.scale_by(self.surf, self.size)
         self.rect = self.image.get_frect(center = self.rect.center)
                 
     def change_appearance(self, bg_img):
         self.surf = self.surfs[bg_img]
-        self.image = pg.transform.smoothscale_by(self.surf, self.size)
+        self.image = pg.transform.scale_by(self.surf, self.size)
         self.rect = self.image.get_frect(center = self.rect.center)
         
     
@@ -849,7 +849,7 @@ class Game:
         
         self.player = Player(self.time_sensitive_sprites, self.player_parts)
                 
-        backgrounds_label = StaticUI(self.play_sprites, self.backgrounds_label_surf, (settings.W / 2, settings.H / 2))
+        static_ui = StaticUI(self.play_sprites, self.backgrounds_label_surf, (settings.W / 2, settings.H / 2))
         halftone_bg_button = BackgroundsButton(self.play_sprites, 'halftone', 'selected', self.background_button_surfs, (450, 675))
         outdoors_bg_button = BackgroundsButton(self.play_sprites, 'outdoors', 'unselected', self.background_button_surfs, (550, 675))
         hotel_bg_button = BackgroundsButton(self.play_sprites, 'hotel', 'unselected', self.background_button_surfs, (650, 675))
