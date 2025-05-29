@@ -418,7 +418,7 @@ class Checkbox(pg.sprite.Sprite):
     def give_state(self):
         return self.selected
     
-class BackgroundsLabel(pg.sprite.Sprite):
+class StaticUI(pg.sprite.Sprite):
     def __init__(self, groups, surf, pos):
         super().__init__(groups)
         self.image = surf
@@ -820,7 +820,7 @@ class Game:
         # Sprites
         self.player = Player(self.time_sensitive_sprites, self.player_parts)
                 
-        backgrounds_label = BackgroundsLabel(self.play_sprites, self.backgrounds_label_surf, (settings.W / 2, settings.H / 2))
+        backgrounds_label = StaticUI(self.play_sprites, self.backgrounds_label_surf, (settings.W / 2, settings.H / 2))
         halftone_bg_button = BackgroundsButton(self.play_sprites, 'halftone', 'selected', self.background_button_surfs, (450, 675))
         outdoors_bg_button = BackgroundsButton(self.play_sprites, 'outdoors', 'unselected', self.background_button_surfs, (550, 675))
         hotel_bg_button = BackgroundsButton(self.play_sprites, 'hotel', 'unselected', self.background_button_surfs, (650, 675))
