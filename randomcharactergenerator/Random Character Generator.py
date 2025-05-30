@@ -438,11 +438,13 @@ class StaticUI(pg.sprite.Sprite):
         self.rect = self.image.get_frect(center=self.pos)
 
 class Background(pg.sprite.Sprite):
-    def __init__(self, groups, surfs):
+    def __init__(self, groups, surfs, user_settings):
         super().__init__(groups)
+        self.user_settings = user_settings
         self.surfs = surfs
         self.surf = self.surfs['halftone']
-        self.size = 1 + ((85 / 100) / 20)
+        self.zoom_magnitude = 60
+        self.size = 1 + ((user_settings['Zoom'] / 100) / self.zoom_magnitude)
         self.image = pg.transform.smoothscale_by(self.surf, self.size)
         self.rect = self.image.get_frect(center = (settings.W / 2, settings.H / 2))
 
@@ -451,14 +453,14 @@ class Background(pg.sprite.Sprite):
         x = 1
         
     def zoom(self, zoom_idx, bg_img):
-        self.size = 1 + ((zoom_idx / 100) / 20)
+        self.size = 1 + ((zoom_idx / 100) / self.zoom_magnitude)
         self.image = pg.transform.scale_by(self.surf, self.size)
         self.rect = self.image.get_frect(center = self.rect.center)
                 
     def change_appearance(self, bg_img):
         self.surf = self.surfs[bg_img]
         self.image = pg.transform.scale_by(self.surf, self.size)
-        self.rect = self.image.get_frect(center = self.rect.center)
+        self.rect = self.image.get_frect(center = (settings.W / 2, settings.H / 2))
         
     
 
@@ -809,12 +811,12 @@ class Game:
         about_box = pg.image.load(resource_path(join('assets', 'img', 'ui', 'about_box.png'))).convert_alpha()
         
         x = 130 / 2
-        patreon_button = Button(self.about_sprites, '', self.patreon_button_surfs, (x + 580, 760), self.font, 'dark')
-        twitter_button = Button(self.about_sprites, '', self.twitter_button_surfs, (x + 710, 760), self.font, 'dark')
-        bluesky_button = Button(self.about_sprites, '', self.bluesky_button_surfs, (x + 840, 760), self.font, 'dark')
-        cara_button = Button(self.about_sprites, '', self.cara_button_surfs, (x + 970, 760), self.font, 'dark')
-        tumblr_button = Button(self.about_sprites, '', self.tumblr_button_surfs, (x + 1100, 760), self.font, 'dark')
-        # nsfw_button = Button(self.about_sprites, '', self.nsfw_button_surfs, (1230, 760), self.font, 'dark')
+        patreon_button = Button(self.about_sprites, '', self.patreon_button_surfs, (580, 760), self.font, 'dark')
+        twitter_button = Button(self.about_sprites, '', self.twitter_button_surfs, (710, 760), self.font, 'dark')
+        bluesky_button = Button(self.about_sprites, '', self.bluesky_button_surfs, (840, 760), self.font, 'dark')
+        cara_button = Button(self.about_sprites, '', self.cara_button_surfs, (970, 760), self.font, 'dark')
+        tumblr_button = Button(self.about_sprites, '', self.tumblr_button_surfs, (1100, 760), self.font, 'dark')
+        nsfw_button = Button(self.about_sprites, '', self.nsfw_button_surfs, (1230, 760), self.font, 'dark')
         
         return_button = Button(self.about_sprites, 'return to main menu', self.return_button_surfs, (settings.W / 2, 965), self.font, 'dark')
                         
@@ -839,8 +841,8 @@ class Game:
                         webbrowser.open('https://cara.app/stekken/all')
                     if tumblr_button.check_for_input():
                         webbrowser.open('https://www.tumblr.com/blog/stekken')
-                    #if nsfw_button.check_for_input():
-                        #webbrowser.open('https://linktr.ee/stekkennsfw')
+                    if nsfw_button.check_for_input():
+                        webbrowser.open('https://linktr.ee/stekkennsfw')
                     if return_button.check_for_input():
                         self.sfx_button_click.play()
                         for sprite in self.about_sprites:
@@ -860,7 +862,7 @@ class Game:
         bg_img = self.user_settings["Background"]
 
         # Sprites
-        background = Background(self.play_sprites, self.background_surfs)
+        background = Background(self.play_sprites, self.background_surfs, self.user_settings)
         
         self.player = Player(self.time_sensitive_sprites, self.player_parts)
                 
