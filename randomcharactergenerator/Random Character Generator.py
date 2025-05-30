@@ -51,8 +51,10 @@ class Player(pg.sprite.Sprite):
         self.panties = ["lacy_dark", "microkini"]
         self.bottoms = [ "none", "shorts", "skirt", "skirt_dark","jeans"]
         self.bras = ["microkini", "bra", "turtleneck", "bunny"]
-        self.chests = ["none", "cropped_tank_dark", "cropped_tank_light", "cropped_shirt"]
-        self.tops = ["none", "jacket", "coat", "maid_dress", "bunny", "cropped_hoodie", "colored_cropped_hoodie"]
+        self.chests = ["none", "cropped_tank_dark", "cropped_tank_light", "cropped_shirt",
+                       ]
+        self.tops = ["none", "jacket", "coat", "maid_dress", "bunny", "cropped_hoodie", "colored_cropped_hoodie", 
+                     "trans_off_one_shoulder_crop", "white_off_one_shoulder_crop", "black_off_one_shoulder_crop"]
         self.socks = ["none", "leggings", "thigh_highs_black", "fishnet"]
         self.eye_colors = ["purple", "red", "blue", "green", "brown"]
         
@@ -125,8 +127,8 @@ class Player(pg.sprite.Sprite):
         self.eye_colors_idx = randint(0, len(self.eye_colors) - 1)
         # Prevents cropped shirt from being selected if a cropped hoodie is selected. 
         if self.chests[self.chests_idx] == "cropped_shirt":
-            if self.tops[self.tops_idx] == "cropped_hoodie" or self.tops[self.tops_idx] == "colored_cropped_hoodie":
-                self.chests_idx = randint(0, len(self.chests) - 2)
+            if self.tops[self.tops_idx].endswith("cropped_hoodie"):
+                self.chests_idx = randint(0, len(self.chests) - 5)
             
 
     def change_appearance(self):
@@ -797,12 +799,13 @@ class Game:
         about_bg = self.background_surfs['halftone']
         about_box = pg.image.load(resource_path(join('assets', 'img', 'ui', 'about_box.png'))).convert_alpha()
         
-        patreon_button = Button(self.about_sprites, '', self.patreon_button_surfs, (580, 760), self.font, 'dark')
-        twitter_button = Button(self.about_sprites, '', self.twitter_button_surfs, (710, 760), self.font, 'dark')
-        bluesky_button = Button(self.about_sprites, '', self.bluesky_button_surfs, (840, 760), self.font, 'dark')
-        cara_button = Button(self.about_sprites, '', self.cara_button_surfs, (970, 760), self.font, 'dark')
-        tumblr_button = Button(self.about_sprites, '', self.tumblr_button_surfs, (1100, 760), self.font, 'dark')
-        nsfw_button = Button(self.about_sprites, '', self.nsfw_button_surfs, (1230, 760), self.font, 'dark')
+        x = 130 / 2
+        patreon_button = Button(self.about_sprites, '', self.patreon_button_surfs, (x + 580, 760), self.font, 'dark')
+        twitter_button = Button(self.about_sprites, '', self.twitter_button_surfs, (x + 710, 760), self.font, 'dark')
+        bluesky_button = Button(self.about_sprites, '', self.bluesky_button_surfs, (x + 840, 760), self.font, 'dark')
+        cara_button = Button(self.about_sprites, '', self.cara_button_surfs, (x + 970, 760), self.font, 'dark')
+        tumblr_button = Button(self.about_sprites, '', self.tumblr_button_surfs, (x + 1100, 760), self.font, 'dark')
+        # nsfw_button = Button(self.about_sprites, '', self.nsfw_button_surfs, (1230, 760), self.font, 'dark')
         
         return_button = Button(self.about_sprites, 'return to main menu', self.return_button_surfs, (settings.W / 2, 965), self.font, 'dark')
                         
@@ -827,8 +830,8 @@ class Game:
                         webbrowser.open('https://cara.app/stekken/all')
                     if tumblr_button.check_for_input():
                         webbrowser.open('https://www.tumblr.com/blog/stekken')
-                    if nsfw_button.check_for_input():
-                        webbrowser.open('https://linktr.ee/stekkennsfw')
+                    #if nsfw_button.check_for_input():
+                        #webbrowser.open('https://linktr.ee/stekkennsfw')
                     if return_button.check_for_input():
                         self.sfx_button_click.play()
                         for sprite in self.about_sprites:
