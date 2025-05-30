@@ -51,8 +51,7 @@ class Player(pg.sprite.Sprite):
         self.panties = ["lacy_dark", "microkini"]
         self.bottoms = [ "none", "shorts", "skirt", "skirt_dark","jeans"]
         self.bras = ["microkini", "bra", "turtleneck", "bunny"]
-        self.chests = ["none", "cropped_tank_dark", "cropped_tank_light", "cropped_shirt",
-                       ]
+        self.chests = ["none", "cropped_tank_dark", "cropped_tank_light", "cropped_shirt"]
         self.tops = ["none", "jacket", "coat", "maid_dress", "bunny", "cropped_hoodie", "colored_cropped_hoodie", 
                      "trans_off_one_shoulder_crop", "white_off_one_shoulder_crop", "black_off_one_shoulder_crop"]
         self.socks = ["none", "leggings", "thigh_highs_black", "fishnet"]
@@ -73,17 +72,20 @@ class Player(pg.sprite.Sprite):
         
         # Initial appearance as question mark
         surf = self.parts['question_mark']
-        surf = pg.transform.scale_by(surf, .9)
+        #surf = pg.transform.scale_by(surf, .9)
+        surf = pg.transform.scale_by(surf, .46)
         self.appearance = surf
         self.image = self.appearance
-        self.rect = self.image.get_frect(center=(1300, 550))
+        self.rect = self.image.get_frect(center = (1300, 550))
         self.initial_center_y = self.rect.centery
         self.zoom_rect = self.rect
         
         # Animation
         self.tick = 1
-        self.h = 1508
-        self.w = 1060
+        #self.h = 1508 # Low res
+        #self.w = 1060 # Low res
+        self.h = 2513 # High res
+        self.w = 1766 # High res
         self.breathing = False
         
         self.twitch_time_remaining = 0
@@ -104,10 +106,14 @@ class Player(pg.sprite.Sprite):
         breathing_speed = 1
         breathing_magnitude = 10
         if self.breathing:
-            img_x = 1060
-            img_y = 1508
-            self.w = img_x * self.twitch_w * (.55 + (.003 * zoom))
-            self.h = img_y * self.twitch_h * (.55 + (.003 * zoom))
+            #img_x = 1060 # Low res
+            #img_y = 1508 # Low res
+            img_x = 1766 # High res
+            img_y = 2513 # High res
+            #self.w = img_x * self.twitch_w * (.55 + (.003 * zoom)) # Low res
+            #self.h = img_y * self.twitch_h * (.55 + (.003 * zoom)) # Low res
+            self.w = img_x * self.twitch_w * (.322 + (.0018 * zoom)) # High res
+            self.h = img_y * self.twitch_h * (.322 + (.0018 * zoom)) # High res
             self.zoom_rect = pg.transform.scale(self.appearance, (self.w, self.h)).get_frect(center = self.zoom_rect.center)
             self.w -= numpy.sin(breathing_speed * self.tick) * breathing_magnitude
             self.h += numpy.sin(breathing_speed * self.tick) * breathing_magnitude * .5
@@ -128,7 +134,7 @@ class Player(pg.sprite.Sprite):
         # Prevents cropped shirt from being selected if a cropped hoodie is selected. 
         if self.chests[self.chests_idx] == "cropped_shirt":
             if self.tops[self.tops_idx].endswith("cropped_hoodie"):
-                self.chests_idx = randint(0, len(self.chests) - 5)
+                self.chests_idx = randint(0, len(self.chests) - 2)
             
 
     def change_appearance(self):
@@ -144,7 +150,8 @@ class Player(pg.sprite.Sprite):
         
     def return_image(self):
         # Draws character at max res and returns it
-        surf = pg.Surface((1060, 1508), pg.SRCALPHA)
+        #surf = pg.Surface((1060, 1508), pg.SRCALPHA) # Low res
+        surf = pg.Surface((1766, 2513), pg.SRCALPHA) # High res
         if self.tops[self.tops_idx] != 'none':
             if self.tops[self.tops_idx] == "colored_cropped_hoodie":
                 surf.blit(self.parts[f'top_{self.eye_colors[self.eye_colors_idx]}_{self.tops[self.tops_idx]}_back1'])
@@ -189,7 +196,8 @@ class Player(pg.sprite.Sprite):
             surf.blit(self.parts[f'{self.races[self.races_idx]}ear_front'])
 
         data = pg.image.tobytes(surf, "RGBA")
-        final_surf = pg.image.frombytes(data, (1060, 1508), "RGBA")
+        #final_surf = pg.image.frombytes(data, (1060, 1508), "RGBA") # Low res
+        final_surf = pg.image.frombytes(data, (1766, 2513), "RGBA") # High res
         return final_surf
     
 class SplashArt(pg.sprite.Sprite):
@@ -508,7 +516,8 @@ class Game:
 
         # Imports: Player
         self.player_parts = {}
-        for folder_path, sub_folders, file_names in walk(resource_path(join('assets', "img", "player_pieces"))):
+        #for folder_path, sub_folders, file_names in walk(resource_path(join('assets', "img", "player_pieces_low_res"))): # Low res
+        for folder_path, sub_folders, file_names in walk(resource_path(join('assets', "img", "player_pieces_high_res"))): # High res
             if file_names:
                 for file_name in file_names:
                     path = resource_path(join(folder_path, file_name))
