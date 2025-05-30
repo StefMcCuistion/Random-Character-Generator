@@ -441,26 +441,30 @@ class Background(pg.sprite.Sprite):
     def __init__(self, groups, surfs, user_settings):
         super().__init__(groups)
         self.user_settings = user_settings
+        self.center_offset = .035 # Use this to make the center of the zoom effect appear to be the center of the player
+        self.zoom_idx = self.user_settings["Zoom"]
         self.surfs = surfs
         self.surf = self.surfs['halftone']
         self.zoom_magnitude = 60
-        self.size = 1 + ((user_settings['Zoom'] / 100) / self.zoom_magnitude)
+        self.base_size = 1.3
+        self.size = self.base_size + ((self.zoom_idx / 100) / self.zoom_magnitude)
         self.image = pg.transform.smoothscale_by(self.surf, self.size)
-        self.rect = self.image.get_frect(center = (settings.W / 2, settings.H / 2))
+        self.rect = self.image.get_frect(center = (settings.W / 2 - (self.zoom_idx * self.center_offset), settings.H / 2))
 
 
     def update(self, dt):
         x = 1
         
     def zoom(self, zoom_idx, bg_img):
-        self.size = 1 + ((zoom_idx / 100) / self.zoom_magnitude)
+        self.zoom_idx = zoom_idx
+        self.size = self.base_size + ((self.zoom_idx / 100) / self.zoom_magnitude)
         self.image = pg.transform.scale_by(self.surf, self.size)
-        self.rect = self.image.get_frect(center = self.rect.center)
+        self.rect = self.image.get_frect(center = (settings.W / 2 - (self.zoom_idx * self.center_offset), settings.H / 2))
                 
     def change_appearance(self, bg_img):
         self.surf = self.surfs[bg_img]
         self.image = pg.transform.scale_by(self.surf, self.size)
-        self.rect = self.image.get_frect(center = (settings.W / 2, settings.H / 2))
+        self.rect = self.image.get_frect(center = self.rect.center)
         
     
 
