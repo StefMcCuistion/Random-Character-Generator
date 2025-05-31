@@ -46,7 +46,7 @@ class Player(pg.sprite.Sprite):
         self.parts = parts
         self.skin_colors = ["fair", "less_fair", "pale_brown", "medium_brown", "dark_brown", "black"]
         self.races = ["human", "cat", "dragon", "bunny"]
-        self.hairstyles = ["emo", "bubble_braid", "curly_mohawk"]
+        self.hairstyles = ["emo", "bubble_braid", "curly_mohawk", "short", "spiky"]
         self.hair_colors = ["black", "blonde", "brown", "purple", "white", "pink1", "pink2"]
         self.panties = ["lacy_dark", "microkini"]
         self.bottoms = [ "none", "shorts", "skirt", "skirt_dark","jeans"]
@@ -194,6 +194,8 @@ class Player(pg.sprite.Sprite):
             surf.blit(self.parts[f'{self.races[self.races_idx]}ear_front_{self.hair_colors[self.hair_colors_idx]}'])
         elif self.races[self.races_idx] == "dragon":
             surf.blit(self.parts[f'{self.races[self.races_idx]}ear_front'])
+        if self.hairstyles[self.hairstyles_idx] == 'spiky':
+            surf.blit(self.parts[f'hair_{self.hairstyles[self.hairstyles_idx]}_{self.hair_colors[self.hair_colors_idx]}_front2'])
 
         data = pg.image.tobytes(surf, "RGBA")
         #final_surf = pg.image.frombytes(data, (1060, 1508), "RGBA") # Low res
@@ -859,7 +861,6 @@ class Game:
             self.about_sprites.draw(self.display)
             self.about_sprites.update(self.display)
             pg.display.flip()
-
 
     def play(self):
         
