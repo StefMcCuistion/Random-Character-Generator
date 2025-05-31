@@ -46,7 +46,7 @@ class Player(pg.sprite.Sprite):
         self.parts = parts
         self.skin_colors = ["fair", "less_fair", "pale_brown", "medium_brown", "dark_brown", "black"]
         self.races = ["human", "cat", "dragon", "bunny"]
-        self.hairstyles = ["emo", "bubble_braid"]
+        self.hairstyles = ["emo", "bubble_braid", "curly_mohawk"]
         self.hair_colors = ["black", "blonde", "brown", "purple", "white", "pink1", "pink2"]
         self.panties = ["lacy_dark", "microkini"]
         self.bottoms = [ "none", "shorts", "skirt", "skirt_dark","jeans"]
@@ -182,7 +182,7 @@ class Player(pg.sprite.Sprite):
         surf.blit(self.parts[f'face_{self.eye_colors[self.eye_colors_idx]}'])
         if self.races[self.races_idx] == "cat" or self.races[self.races_idx] == "bunny":
             surf.blit(self.parts[f'{self.races[self.races_idx]}ear_back_{self.hair_colors[self.hair_colors_idx]}'])
-            surf.blit(self.parts[f'{self.races[self.races_idx]}ear_under_hair_{self.hair_colors[self.hair_colors_idx]}'])
+            #surf.blit(self.parts[f'{self.races[self.races_idx]}ear_under_hair_{self.hair_colors[self.hair_colors_idx]}'])
         elif self.races[self.races_idx] == "dragon":
             surf.blit(self.parts[f'{self.races[self.races_idx]}ear_back'])
             surf.blit(self.parts[f'{self.races[self.races_idx]}ear_under_hair'])
