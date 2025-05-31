@@ -45,7 +45,7 @@ class Player(pg.sprite.Sprite):
         # Apperance options
         self.parts = parts
         self.skin_colors = ["fair", "less_fair", "pale_brown", "medium_brown", "dark_brown", "black"]
-        self.races = ["human", "cat", "dragon"]
+        self.races = ["human", "cat", "dragon", "bunny"]
         self.hairstyles = ["emo", "bubble_braid"]
         self.hair_colors = ["black", "blonde", "brown", "purple", "white", "pink1", "pink2"]
         self.panties = ["lacy_dark", "microkini"]
@@ -152,20 +152,20 @@ class Player(pg.sprite.Sprite):
         # Draws character at max res and returns it
         #surf = pg.Surface((1060, 1508), pg.SRCALPHA) # Low res
         surf = pg.Surface((1766, 2513), pg.SRCALPHA) # High res
+        if self.hairstyles[self.hairstyles_idx] != 'bald':
+            surf.blit(self.parts[f'hair_{self.hairstyles[self.hairstyles_idx]}_{self.hair_colors[self.hair_colors_idx]}_back'])     # Hair back
         if self.tops[self.tops_idx] != 'none':
             if self.tops[self.tops_idx] == "colored_cropped_hoodie":
                 surf.blit(self.parts[f'top_{self.eye_colors[self.eye_colors_idx]}_{self.tops[self.tops_idx]}_back1'])
             else:
-                surf.blit(self.parts[f'top_{self.tops[self.tops_idx]}_back1'])
-        if self.hairstyles[self.hairstyles_idx] != 'bald':
-            surf.blit(self.parts[f'hair_{self.hairstyles[self.hairstyles_idx]}_{self.hair_colors[self.hair_colors_idx]}_back'])
+                surf.blit(self.parts[f'top_{self.tops[self.tops_idx]}_back1'])                                                      # Top back1
         if self.races[self.races_idx] == "cat" or self.races[self.races_idx] == "bunny":
-            surf.blit(self.parts[f'tail_{self.races[self.races_idx]}_{self.hair_colors[self.hair_colors_idx]}'])
+            surf.blit(self.parts[f'tail_{self.races[self.races_idx]}_{self.hair_colors[self.hair_colors_idx]}'])                    # Tail
         if self.races[self.races_idx] == "dragon":
             surf.blit(self.parts[f'tail_{self.races[self.races_idx]}'])
         if self.tops[self.tops_idx] != 'none':
             if self.tops[self.tops_idx] == "colored_cropped_hoodie":
-                surf.blit(self.parts[f'top_{self.eye_colors[self.eye_colors_idx]}_{self.tops[self.tops_idx]}_back2'])
+                surf.blit(self.parts[f'top_{self.eye_colors[self.eye_colors_idx]}_{self.tops[self.tops_idx]}_back2'])               # Top back2
             else:
                 surf.blit(self.parts[f'top_{self.tops[self.tops_idx]}_back2'])
         surf.blit(self.parts[f'body_{self.skin_colors[self.skin_colors_idx]}'])
