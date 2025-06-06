@@ -46,15 +46,18 @@ class Player(pg.sprite.Sprite):
         self.parts = parts
         self.skin_colors = ["fair", "less_fair", "pale_brown", "medium_brown", "dark_brown", "black"]
         self.races = ["human", "cat", "dragon", "bunny"]
-        self.hairstyles = ["emo", "bubble_braid", "curly_mohawk", "short", "spiky"]
+        self.hairstyles = ["emo", "bubble_braid", "curly_mohawk", "short", "spiky", "ponytail", "straight", "teto", "miku"]
         self.hair_colors = ["black", "blonde", "brown", "purple", "white", "pink1", "pink2"]
-        self.panties = ["lacy_dark", "microkini"]
-        self.bottoms = [ "none", "shorts", "skirt", "skirt_dark","jeans"]
-        self.bras = ["microkini", "bra", "turtleneck", "bunny"]
+        self.panties = ["none", "lacy_dark", "microkini"]
+        self.bottoms = [ "none", "shorts", "skirt_light", "skirt_dark", "long_skirt_light", "long_skirt_dark", "jeans"]
+        self.bras = ["none", "microkini", "bralette", "turtleneck", "bunny"]
         self.chests = ["none", "cropped_tank_dark", "cropped_tank_light", "cropped_shirt"]
         self.tops = ["none", "jacket", "coat", "maid_dress", "bunny", "cropped_hoodie", "colored_cropped_hoodie", 
-                     "trans_off_one_shoulder_crop", "white_off_one_shoulder_crop", "black_off_one_shoulder_crop"]
-        self.socks = ["none", "leggings", "thigh_highs_black", "fishnet"]
+                     "trans_off_one_shoulder_crop", "white_off_one_shoulder_crop", "black_off_one_shoulder_crop",
+                     "techwear"]
+        self.socks = ["none", "leggings_black", "thigh_highs_black", "fishnet_thigh_highs", "fishnet_leggings", "knee_high_black_with_fishnet_thigh_highs", 
+                      "knee_high_black_with_fishnet_leggings", "leggings_pantyhose", "pantyhose_thigh_highs", "knee_high_black_with_pantyhose_leggings", 
+                      "knee_high_black_with_pantyhose_thigh_highs"]
         self.eye_colors = ["purple", "red", "blue", "green", "brown"]
         
         # Index Defaults, used when not randomized
@@ -63,8 +66,8 @@ class Player(pg.sprite.Sprite):
         self.hair_colors_idx = 0
         self.races_idx = 0
         self.tops_idx = 0
-        self.panties_idx = 0
-        self.bras_idx = 0
+        self.panties_idx = 1
+        self.bras_idx = 1
         self.bottoms_idx = 0
         self.socks_idx = 0
         self.chests_idx = 0
@@ -127,14 +130,23 @@ class Player(pg.sprite.Sprite):
         self.races_idx = randint(0, len(self.races) - 1)
         self.tops_idx = randint(0, len(self.tops) - 1)
         self.bottoms_idx = randint(0, len(self.bottoms) - 1)
-        self.panties_idx = randint(0, len(self.panties) - 1)
+        self.panties_idx = randint(1, len(self.panties) - 1)
+        self.bras_idx = randint(1, len(self.bras) - 1)
         self.socks_idx = randint(0, len(self.socks) - 1)
         self.chests_idx = randint(0, len(self.chests) - 1)
         self.eye_colors_idx = randint(0, len(self.eye_colors) - 1)
         # Prevents cropped shirt from being selected if a cropped hoodie is selected. 
-        if self.chests[self.chests_idx] == "cropped_shirt":
-            if self.tops[self.tops_idx].endswith("cropped_hoodie"):
+        if self.tops[self.tops_idx].endswith("cropped_hoodie"):
+            if self.chests[self.chests_idx] == "cropped_shirt":
                 self.chests_idx = randint(0, len(self.chests) - 2)
+        elif self.tops[self.tops_idx] == "techwear":
+            self.chests_idx = 0
+            self.bottoms_idx = 0
+            self.bras_idx = 0
+            self.panties_idx = 0
+        if self.bras[self.bras_idx] == 'turtleneck':
+            self.chests_idx = 0
+            
             
 
     def change_appearance(self):
@@ -171,9 +183,11 @@ class Player(pg.sprite.Sprite):
         surf.blit(self.parts[f'body_{self.skin_colors[self.skin_colors_idx]}'])
         surf.blit(self.parts[f'panties_{self.panties[self.panties_idx]}'])
         surf.blit(self.parts[f'socks_{self.socks[self.socks_idx]}'])
-        surf.blit(self.parts[f'chest_{self.bras[self.bras_idx]}'])
+        surf.blit(self.parts[f'bra_{self.bras[self.bras_idx]}'])
         surf.blit(self.parts[f'bottom_{self.bottoms[self.bottoms_idx]}'])
         surf.blit(self.parts[f'arm_{self.skin_colors[self.skin_colors_idx]}'])
+        if self.bras[self.bras_idx] == 'turtleneck':
+            surf.blit(self.parts[f'bra_{self.bras[self.bras_idx]}_front'])
         surf.blit(self.parts[f'chest_{self.chests[self.chests_idx]}'])
         if self.tops[self.tops_idx] == "colored_cropped_hoodie":
             surf.blit(self.parts[f'top_{self.eye_colors[self.eye_colors_idx]}_{self.tops[self.tops_idx]}_front'])
@@ -194,7 +208,9 @@ class Player(pg.sprite.Sprite):
             surf.blit(self.parts[f'{self.races[self.races_idx]}ear_front_{self.hair_colors[self.hair_colors_idx]}'])
         elif self.races[self.races_idx] == "dragon":
             surf.blit(self.parts[f'{self.races[self.races_idx]}ear_front'])
-        if self.hairstyles[self.hairstyles_idx] == 'spiky':
+        if self.tops[self.tops_idx] == "techwear":
+            surf.blit(self.parts[f'top_{self.tops[self.tops_idx]}_front2'])
+        if self.hairstyles[self.hairstyles_idx] == 'spiky' or self.hairstyles[self.hairstyles_idx] == 'teto':
             surf.blit(self.parts[f'hair_{self.hairstyles[self.hairstyles_idx]}_{self.hair_colors[self.hair_colors_idx]}_front2'])
 
         data = pg.image.tobytes(surf, "RGBA")
@@ -816,12 +832,12 @@ class Game:
         about_bg = self.background_surfs['halftone']
         about_box = pg.image.load(resource_path(join('assets', 'img', 'ui', 'about_box.png'))).convert_alpha()
         
-        x = 130 / 2
-        patreon_button = Button(self.about_sprites, '', self.patreon_button_surfs, (580, 760), self.font, 'dark')
-        twitter_button = Button(self.about_sprites, '', self.twitter_button_surfs, (710, 760), self.font, 'dark')
-        bluesky_button = Button(self.about_sprites, '', self.bluesky_button_surfs, (840, 760), self.font, 'dark')
-        cara_button = Button(self.about_sprites, '', self.cara_button_surfs, (970, 760), self.font, 'dark')
-        tumblr_button = Button(self.about_sprites, '', self.tumblr_button_surfs, (1100, 760), self.font, 'dark')
+        x = (150 / 2) * 0
+        patreon_button = Button(self.about_sprites, '', self.patreon_button_surfs, (x + 580, 760), self.font, 'dark')
+        twitter_button = Button(self.about_sprites, '', self.twitter_button_surfs, (x + 710, 760), self.font, 'dark')
+        bluesky_button = Button(self.about_sprites, '', self.bluesky_button_surfs, (x + 840, 760), self.font, 'dark')
+        cara_button = Button(self.about_sprites, '', self.cara_button_surfs, (x + 970, 760), self.font, 'dark')
+        tumblr_button = Button(self.about_sprites, '', self.tumblr_button_surfs, (x + 1100, 760), self.font, 'dark')
         nsfw_button = Button(self.about_sprites, '', self.nsfw_button_surfs, (1230, 760), self.font, 'dark')
         
         return_button = Button(self.about_sprites, 'return to main menu', self.return_button_surfs, (settings.W / 2, 965), self.font, 'dark')
@@ -847,8 +863,8 @@ class Game:
                         webbrowser.open('https://cara.app/stekken/all')
                     if tumblr_button.check_for_input():
                         webbrowser.open('https://www.tumblr.com/blog/stekken')
-                    if nsfw_button.check_for_input():
-                        webbrowser.open('https://linktr.ee/stekkennsfw')
+                    #if nsfw_button.check_for_input():
+                        #webbrowser.open('https://linktr.ee/stekkennsfw')
                     if return_button.check_for_input():
                         self.sfx_button_click.play()
                         for sprite in self.about_sprites:
