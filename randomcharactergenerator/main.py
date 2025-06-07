@@ -804,19 +804,15 @@ class Game:
 
         # Imports: Character
         self.character_parts_low_res = {}
-        for folder_path, sub_folders, file_names in walk(resource_path(join('assets', "img", "character_parts_low_res"))): # For in-game
-            if file_names:
-                for file_name in file_names:
-                    path = resource_path(join(folder_path, file_name))
-                    surf = pg.image.load(path).convert_alpha()
-                    self.character_parts_low_res[file_name.split('.')[0]] = surf
         self.character_parts_high_res = {}
-        for folder_path, sub_folders, file_names in walk(resource_path(join('assets', "img", "character_parts_high_res"))): # For image saving
+        for folder_path, sub_folders, file_names in walk(resource_path(join('assets', "img", "character_parts"))): # For in-game
             if file_names:
                 for file_name in file_names:
                     path = resource_path(join(folder_path, file_name))
-                    surf = pg.image.load(path).convert_alpha()
-                    self.character_parts_high_res[file_name.split('.')[0]] = surf
+                    surf_high_res = pg.image.load(path).convert_alpha()
+                    surf_low_res = pg.transform.smoothscale_by(surf_high_res, .5)
+                    self.character_parts_high_res[file_name.split('.')[0]] = surf_high_res
+                    self.character_parts_low_res[file_name.split('.')[0]] = surf_low_res
                     
         # Imports: Backgrounds
         self.background_surfs = {
