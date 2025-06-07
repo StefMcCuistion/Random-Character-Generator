@@ -48,22 +48,30 @@ class Character(pg.sprite.Sprite):
         self.skin_colors = ["fair", "less_fair", "pale_brown", "medium_brown", "dark_brown", "black"]
         self.species = ["human", "cat", "dragon", "bunny"]
         self.hairstyles = ["emo", "bubble_braid", "mohawk_with_curls", "straight_short", "straight_long", "spiky", "ponytail", "teto", "miku"]
-        self.hair_colors = ["black", "blonde", "brown", "purple", "white", "pink_1", "pink_2"]
+        self.hair_colors = ["black", "blonde", "brown", "purple", "white", "pink_1", "pink_2", "red"]
         self.lower_innerwear = ["none", "lacy_black_panties", "microkini_bottom"]
-        self.lower_outerwear = ["none", "jean_shorts", "low_waisted_skirt_dark_gray", "low_waisted_skirt_black", "high_waisted_skirt_dark_gray", "high_waisted_skirt_black", "ripped_jeans"]
+        self.lower_outerwear = [
+                                "none", "jean_shorts", "low_waisted_skirt_dark_gray", "low_waisted_skirt_black", "high_waisted_skirt_dark_gray",
+                                "high_waisted_skirt_black", "ripped_jeans"
+                                ]
         self.upper_innerwear = ["none", "microkini_top", "bralette", "turtleneck", "leotard"]
         self.upper_outerwear = ["none", "cropped_tank_dark", "cropped_tank_white_with_heart", "cropped_tee"]
-        self.outfits = ["none", "jacket", "coat", "maid_dress", "floating_collar_and_cuffs", "cropped_hoodie_black", "cropped_hoodie_with_eye_color", 
-                     "trans_off_one_shoulder_crop", "white_off_one_shoulder_crop", "black_off_one_shoulder_crop",
-                     "techwear"]
-        self.socks_and_leggings = ["none", "black_thigh_high_socks", "knee_high_black_socks", "knee_high_black_socks_with_fishnet_leggings", "knee_high_black_socks_with_fishnet_thigh_highs", 
-                                   "knee_high_black_socks_with_pantyhose_leggings", "knee_high_black_socks_with_pantyhose_thigh_highs", "black_leggings", "fishnet_leggings", "pantyhose_leggings"]
+        self.outfits = [
+                        "none", "jacket", "coat", "maid_dress", "floating_collar_and_cuffs", "cropped_hoodie_black", "cropped_hoodie_with_eye_color", 
+                        "trans_off_one_shoulder_crop", "white_off_one_shoulder_crop", "black_off_one_shoulder_crop",
+                        "techwear"
+                        ]
+        self.socks_and_leggings = [
+                                   "none", "black_thigh_high_socks", "knee_high_black_socks", "knee_high_black_socks_with_fishnet_leggings",
+                                   "knee_high_black_socks_with_fishnet_thigh_highs", "knee_high_black_socks_with_pantyhose_leggings",
+                                   "knee_high_black_socks_with_pantyhose_thigh_highs", "black_leggings", "fishnet_leggings", "pantyhose_leggings"
+                                   ]
         self.eye_colors = ["purple", "red", "blue", "green", "brown"]
         
         # Exceptions
         self.hairstyles_with_a_back_layer = ["emo", "bubble_braid", "mohawk_with_curls", "short", "spiky", "ponytail", "straight_long"]
         self.hairstyles_with_no_lineart_on_bottom_layer = ["emo", "straight_long"]
-        self.hairstyles_with_a_top_layer = ["teto", "spiky"]
+        self.hairstyles_with_a_top_layer = ["teto", "spiky", "bubble_braid"]
         self.hairstyles_with_a_transparent_base = ["mohawk_with_curls"]
         self.hairstyles_that_show_middle_layer_of_ears = []
         self.ears_with_three_layers = ["cat", "bunny"]
@@ -78,9 +86,11 @@ class Character(pg.sprite.Sprite):
         self.clothing_pieces_with_an_extra_layer = ["turtleneck", "maid_dress", "techwear"]
         self.clothing_pieces_that_match_eye_color = ["cropped_hoodie_with_eye_color"]
         self.outfits_with_a_bottom_layer = ["jacket", "techwear"]
+        self.outfits_with_deletion_masks = ["coat"]
         
         # Dictionary specifying colors for hair, skin, certain clothes
-        self.color_dict = {# Skin tones
+        self.color_dict = {
+                           # Skin tones
                            "skin_1": (248,231,222),        "blush_1": (244,221,205), 
                            "skin_2": (232,202,186),        "blush_2": (224,186,167), 
                            "skin_3": (215,176,155),        "blush_3": (206,161,133), 
@@ -96,6 +106,7 @@ class Character(pg.sprite.Sprite):
                            "white":  (232,236,240),
                            "pink_1": (255,190,253),
                            "pink_2": (255,191,218),
+                           "red":    "#893a42", 
                            
                            # Clothing that matches eye color
                            "clothing_purple": (166,142,236), 
@@ -198,6 +209,9 @@ class Character(pg.sprite.Sprite):
             self.lower_innerwear_idx = 0
         if self.upper_innerwear[self.upper_innerwear_idx] == 'turtleneck':
             self.upper_outerwear_idx = 0
+        # Overwrites
+        self.outfits_idx = 2
+        self.lower_outerwear_idx = 2
             
     def change_appearance(self):
 
@@ -217,269 +231,242 @@ class Character(pg.sprite.Sprite):
         else: 
             w, h = self.high_res_w, self.high_res_h
             parts = self.character_parts_high_res
-        # Draws character at desired res and returns it
+    # Draws character at desired res and returns it
         surf = pg.Surface((w, h), pg.SRCALPHA) 
-        if False: # Whole image method of blitting
-            if self.hairstyles[self.hairstyles_idx] != 'bald':
-                surf.blit(parts[f'hair_{self.hairstyles[self.hairstyles_idx]}_{self.hair_colors[self.hair_colors_idx]}_back'])     # Hair back
-            if self.outfits[self.outfits_idx] != 'none':
-                if self.outfits[self.outfits_idx] == "colored_cropped_hoodie":
-                    surf.blit(parts[f'top_{self.eye_colors[self.eye_colors_idx]}_{self.outfits[self.outfits_idx]}_back1'])
-                else:
-                    surf.blit(parts[f'top_{self.outfits[self.outfits_idx]}_back1'])                                                      # Top back1
-            if self.species[self.species_idx] == "cat" or self.species[self.species_idx] == "bunny":
-                surf.blit(parts[f'tail_{self.species[self.species_idx]}_{self.hair_colors[self.hair_colors_idx]}'])                    # Tail
-            if self.species[self.species_idx] == "dragon":
-                surf.blit(parts[f'tail_{self.species[self.species_idx]}'])
-            if self.outfits[self.outfits_idx] != 'none':
-                if self.outfits[self.outfits_idx] == "colored_cropped_hoodie":
-                    surf.blit(parts[f'top_{self.eye_colors[self.eye_colors_idx]}_{self.outfits[self.outfits_idx]}_back2'])               # Top back2
-                else:
-                    surf.blit(parts[f'top_{self.outfits[self.outfits_idx]}_back2'])
-            surf.blit(parts[f'body_{self.skin_colors[self.skin_colors_idx]}'])
-            surf.blit(parts[f'panties_{self.lower_innerwear[self.lower_innerwear_idx]}'])
-            surf.blit(parts[f'socks_{self.socks_and_leggings[self.socks_and_leggings_idx]}'])
-            surf.blit(parts[f'bra_{self.upper_innerwear[self.upper_innerwear_idx]}'])
-            surf.blit(parts[f'bottom_{self.lower_outerwear[self.lower_outerwear_idx]}'])
-            surf.blit(parts[f'arm_{self.skin_colors[self.skin_colors_idx]}'])
-            if self.upper_innerwear[self.upper_innerwear_idx] == 'turtleneck':
-                surf.blit(parts[f'bra_{self.upper_innerwear[self.upper_innerwear_idx]}_front'])
-            surf.blit(parts[f'chest_{self.upper_outerwear[self.upper_outerwear_idx]}'])
-            if self.outfits[self.outfits_idx] == "colored_cropped_hoodie":
-                surf.blit(parts[f'top_{self.eye_colors[self.eye_colors_idx]}_{self.outfits[self.outfits_idx]}_front'])
-            else:
-                surf.blit(parts[f'top_{self.outfits[self.outfits_idx]}_front'])
-            surf.blit(parts[f'face_{self.eye_colors[self.eye_colors_idx]}'])
-            if self.species[self.species_idx] == "cat" or self.species[self.species_idx] == "bunny":
-                surf.blit(parts[f'{self.species[self.species_idx]}ear_back_{self.hair_colors[self.hair_colors_idx]}'])
-                #surf.blit(self.parts[f'{self.races[self.races_idx]}ear_under_hair_{self.hair_colors[self.hair_colors_idx]}'])
-            elif self.species[self.species_idx] == "dragon":
-                surf.blit(parts[f'{self.species[self.species_idx]}ear_back'])
-                surf.blit(parts[f'{self.species[self.species_idx]}ear_under_hair'])
-            else:
-                surf.blit(parts[f'humanear_{self.skin_colors[self.skin_colors_idx]}'])
-            if self.hairstyles[self.hairstyles_idx] != 'bald':
-                surf.blit(parts[f'hair_{self.hairstyles[self.hairstyles_idx]}_{self.hair_colors[self.hair_colors_idx]}_front'])
-            if self.species[self.species_idx] == "cat" or self.species[self.species_idx] == "bunny":
-                surf.blit(parts[f'{self.species[self.species_idx]}ear_front_{self.hair_colors[self.hair_colors_idx]}'])
-            elif self.species[self.species_idx] == "dragon":
-                surf.blit(parts[f'{self.species[self.species_idx]}ear_front'])
-            if self.outfits[self.outfits_idx] == "techwear":
-                surf.blit(parts[f'top_{self.outfits[self.outfits_idx]}_front2'])
-            if self.hairstyles[self.hairstyles_idx] == 'spiky' or self.hairstyles[self.hairstyles_idx] == 'teto':
-                surf.blit(parts[f'hair_{self.hairstyles[self.hairstyles_idx]}_{self.hair_colors[self.hair_colors_idx]}_front2'])
-        if True: # Separated base & lineart method of recoloring w/ masks
-            # Store attributes
+    # Store attributes
+        
+        # Misc.
+        skin_color = self.skin_colors_idx + 1
+        eye_color = self.eye_colors[self.eye_colors_idx]
+        species = self.species[self.species_idx]
+        
+        # Hair
+        hair_color = self.hair_colors[self.hair_colors_idx]
+        hairstyle = self.hairstyles[self.hairstyles_idx]
+        if hairstyle in self.hairstyles_with_a_back_layer:
+            include_hair_bottom_layer = True
+            if hairstyle in self.hairstyles_with_no_lineart_on_bottom_layer:
+                include_hair_bottom_layer_lineart = False
+            else: 
+                include_hair_bottom_layer_lineart = True
+        else: 
+            include_hair_bottom_layer = False
+            include_hair_bottom_layer_lineart = False
+        
+        # Ears
+        if species in self.species_with_human_ears:
+            ears = "human"
+            ear_color = f"skin_{skin_color}"
+            ear_layer_count = 1
+        else:
+            ears = species
+            ear_color = hair_color
+            ear_layer_count = 3
             
-                # Misc.
-                skin_color = self.skin_colors_idx + 1
-                eye_color = self.eye_colors[self.eye_colors_idx]
-                species = self.species[self.species_idx]
-                
-                # Hair
-                hair_color = self.hair_colors[self.hair_colors_idx]
-                hairstyle = self.hairstyles[self.hairstyles_idx]
-                if hairstyle in self.hairstyles_with_a_back_layer:
-                    include_hair_bottom_layer = True
-                    if hairstyle in self.hairstyles_with_no_lineart_on_bottom_layer:
-                        include_hair_bottom_layer_lineart = False
-                    else: 
-                        include_hair_bottom_layer_lineart = True
-                else: 
-                    include_hair_bottom_layer = False
-                    include_hair_bottom_layer_lineart = False
-                
-                # Ears
-                if species in self.species_with_human_ears:
-                    ears = "human"
-                    ear_color = f"skin_{skin_color}"
-                    ear_layer_count = 1
-                else:
-                    ears = species
-                    ear_color = hair_color
-                    ear_layer_count = 3
-                    
-                # Horns
-                if species in self.species_with_horns:
-                    has_horns = True
-                else: 
-                    has_horns = False
-                    
-                # Tail
-                if species in self.species_with_tails:
-                    has_a_tail = True
-                    tail = species
-                else: 
-                    has_a_tail = False
-                    tail = ""
-                if tail in self.tails_with_hair_color:
-                    tail_color = hair_color
-                elif tail in self.tails_with_skin_color:
-                    tail_color = skin_color
-                else:
-                    tail_color = "unique"
-                
-                lower_innerwear = self.lower_innerwear[self.lower_innerwear_idx]
-                lower_outerwear = self.lower_outerwear[self.lower_outerwear_idx]
-                upper_innerwear = self.upper_innerwear[self.upper_innerwear_idx]
-                upper_outerwear = self.upper_outerwear[self.upper_outerwear_idx]
-                outfit = self.outfits[self.outfits_idx]
-                socks_and_leggings = self.socks_and_leggings[self.socks_and_leggings_idx]
-                
-            # Draw hair bottom layer if applicable
-                if include_hair_bottom_layer:
-                    # Base
-                    base = pg.mask.from_surface(parts[f'{hairstyle}_bottom_base'])
-                    surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[hair_color]))
-                    # Lineart if applicable
-                    if include_hair_bottom_layer_lineart:
-                        surf.blit(parts[f'{hairstyle}_bottom_lineart'])
-            # Draw outfit bottom layer if applicable
-                if outfit in self.outfits_with_a_bottom_layer:
-                    # Single image
-                    surf.blit(parts[f'{outfit}_bottom'])
-            # Draw tail
-                if has_a_tail:
-                    if tail_color == "unique":
-                        # Single image
-                        surf.blit(parts[f'{tail}_tail'])
-                    else:
-                        # Base
-                        base = pg.mask.from_surface(parts[f'{tail}_tail_base'])
-                        surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[tail_color]))
-                        # Lineart
-                        surf.blit(parts[f'{tail}_tail_lineart'])
-            # Draw body
-                # Base
-                base = pg.mask.from_surface(parts['body_base'])
-                surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[f'skin_{skin_color}']))
-                # Blush base
-                base = pg.mask.from_surface(parts['blush_base'])
-                surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[f'blush_{skin_color}']))
-                # Lineart
-                surf.blit(parts['body_lineart'])
-            # Draw lower innerwear (panties) if applicable]
-                if outfit != "techwear":
-                    # Single image
-                    surf.blit(parts[lower_innerwear])
-            # Draw socks/leggings if applicable
-                if self.socks_and_leggings_idx != 0:
-                    # Single image
-                    surf.blit(parts[socks_and_leggings])
-            # Draw upper innerwear (bra) if applicable
-                if outfit != "techwear":
-                    # Single image
-                    surf.blit(parts[upper_innerwear])
-            # Draw lower outerwear (shorts/skirt/pants) if applicable
-                if self.lower_outerwear_idx != 0:
-                    # Single image
-                    surf.blit(parts[lower_outerwear])
-            # Draw arm
-                # Base
-                base = pg.mask.from_surface(parts['arm_base'])
-                surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[f'skin_{skin_color}']))
-                # Lineart
-                surf.blit(parts['arm_lineart'])
-            # Draw upper innerwear extra layer if applicable
-                if upper_innerwear in self.clothing_pieces_with_an_extra_layer:
-                    # Single image
-                    surf.blit(parts[f'{upper_innerwear}_extra_layer'])
-            # Draw upper outerwear if applicable
-                if self.upper_outerwear_idx != 0:
-                    # Single image
-                    surf.blit(parts[upper_outerwear])
-            # Draw outfit top layer if applicable
-                if outfit in self.clothing_pieces_with_an_extra_layer:
-                    if outfit in self.clothing_pieces_that_match_eye_color:
-                        # Base
-                        base = pg.mask.from_surface(parts[f'{outfit}_top_base'])
-                        surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[f'clothing_{eye_color}']))
-                        # Lineart
-                        surf.blit(parts[f'{outfit}_top_lineart'])
-                    else: 
-                        # Single image
-                        surf.blit(parts[f'{outfit}_top'])
-            # Draw face
+        # Horns
+        if species in self.species_with_horns:
+            has_horns = True
+        else: 
+            has_horns = False
+            
+        # Tail
+        if species in self.species_with_tails:
+            has_a_tail = True
+            tail = species
+        else: 
+            has_a_tail = False
+            tail = ""
+        if tail in self.tails_with_hair_color:
+            tail_color = hair_color
+        elif tail in self.tails_with_skin_color:
+            tail_color = skin_color
+        else:
+            tail_color = "unique"
+        
+        lower_innerwear = self.lower_innerwear[self.lower_innerwear_idx]
+        lower_outerwear = self.lower_outerwear[self.lower_outerwear_idx]
+        upper_innerwear = self.upper_innerwear[self.upper_innerwear_idx]
+        upper_outerwear = self.upper_outerwear[self.upper_outerwear_idx]
+        outfit = self.outfits[self.outfits_idx]
+        socks_and_leggings = self.socks_and_leggings[self.socks_and_leggings_idx]
+        
+    # Draw hair bottom layer if applicable
+        if include_hair_bottom_layer:
+            # Base
+            base = pg.mask.from_surface(parts[f'{hairstyle}_bottom_base'])
+            surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[hair_color]))
+            # Lineart if applicable
+            if include_hair_bottom_layer_lineart:
+                surf.blit(parts[f'{hairstyle}_bottom_lineart'])
+    # Draw outfit bottom layer if applicable
+        if outfit in self.outfits_with_a_bottom_layer:
+            # Single image
+            surf.blit(parts[f'{outfit}_bottom'])
+    # Draw tail
+        if has_a_tail:
+            if tail_color == "unique":
                 # Single image
-                surf.blit(parts[f'face_{eye_color}'])
-            # Draw ears/horns bottom layer if applicable
-                if ear_layer_count == 3:
-                    # Base
-                    base = pg.mask.from_surface(parts[f'{ears}_ears_bottom_base'])
-                    surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[ear_color]))
-                    # Lineart
-                    surf.blit(parts[f'{ears}_ears_bottom_lineart'])
-                if has_horns:
-                    # Single image
-                    surf.blit(parts[f'{species}_horns_bottom'])
-            # Draw ears/horns middle layer if applicable
-                if hairstyle in self.hairstyles_that_show_middle_layer_of_ears:
-                    if ear_layer_count == 3:
-                        # Base
-                        base = pg.mask.from_surface(parts[f'{ears}_ears_middle_base'])
-                        surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[ear_color]))
-                        # Lineart
-                        surf.blit(parts[f'{ears}_ears_middle_lineart'])
-                if has_horns:
-                    # Single image
-                    surf.blit(parts[f'{species}_horns_middle'])
-            # Draw single-layer ears if applicable
-                if ear_layer_count == 1:
-                    # Base
-                    base = pg.mask.from_surface(parts[f'{ears}_ears_base'])
-                    surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[ear_color]))
-                    # Lineart
-                    surf.blit(parts[f'{ears}_ears_lineart'])
-            # Draw outfit middle layer if applicable
-                if self.outfits_idx != 0:
-                    if outfit in self.clothing_pieces_that_match_eye_color:
-                        # Base
-                        base = pg.mask.from_surface(parts[f'{outfit}_middle_base'])
-                        surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[f'clothing_{eye_color}']))
-                        # Lineart
-                        surf.blit(parts[f'{outfit}_middle_lineart'])
-                    else:
-                        # Single image
-                        surf.blit(parts[f'{outfit}_middle'])
-            # Draw hair middle layer
+                surf.blit(parts[f'{tail}_tail'])
+            else:
                 # Base
-                base = pg.mask.from_surface(parts[f'{hairstyle}_middle_base'])
-                surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[hair_color]))
-                # Transparent base if applicable
-                if hairstyle in self.hairstyles_with_a_transparent_base:
-                    base = pg.mask.from_surface(parts[f'{hairstyle}_middle_transparent_base'])
-                    surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=((self.color_dict[hair_color][0]),
-                                                                                   (self.color_dict[hair_color][1]),
-                                                                                   (self.color_dict[hair_color][2]),
-                                                                                   127.5)))
+                base = pg.mask.from_surface(parts[f'{tail}_tail_base'])
+                surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[tail_color]))
                 # Lineart
-                surf.blit(parts[f'{hairstyle}_middle_lineart'])
-            # Draw ears/horns top layer
-                if ear_layer_count == 3:
-                    # Base
-                    base = pg.mask.from_surface(parts[f'{ears}_ears_top_base'])
-                    surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[ear_color]))
-                    # Lineart
-                    surf.blit(parts[f'{ears}_ears_top_lineart'])
-                if has_horns:
-                    # Single image
-                    surf.blit(parts[f'{species}_horns_top'])
-            # Draw outfit front layer if applicable
-                if outfit in self.clothing_pieces_with_an_extra_layer:
-                    # Single image
-                    surf.blit(parts[f'{outfit}_top'])
-            # Draw hair front if applicable
-                if hairstyle in self.hairstyles_with_a_top_layer:
-                    # Base
-                    base = pg.mask.from_surface(parts[f'{hairstyle}_top_base'])
-                    surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[hair_color]))
-                    # Lineart
-                    surf.blit(parts[f'{hairstyle}_top_lineart'])
+                surf.blit(parts[f'{tail}_tail_lineart'])
+    # Draw body
+        # Base
+        base = pg.mask.from_surface(parts['body_base'])
+        surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[f'skin_{skin_color}']))
+        # Blush base
+        base = pg.mask.from_surface(parts['blush_base'])
+        surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[f'blush_{skin_color}']))
+        # Lineart
+        surf.blit(parts['body_lineart'])
+    # Draw lower innerwear (panties) if applicable]
+        if self.lower_innerwear_idx != 0:
+            # Single image
+            surf.blit(parts[lower_innerwear])
+    # Draw socks/leggings if applicable
+        if self.socks_and_leggings_idx != 0:
+            # Single image
+            surf.blit(parts[socks_and_leggings])
+    # Draw upper innerwear (bra) if applicable
+        if self.upper_innerwear_idx != 0:
+            # Single image
+            surf.blit(parts[upper_innerwear])
+    # Draw lower outerwear (shorts/skirt/pants) if applicable
+        if self.lower_outerwear_idx != 0:
+            # Store image
+            part_surf = parts[lower_outerwear]
+            part_surf_copy = part_surf
+            # Deletion mask if applicable
+            if outfit in self.outfits_with_deletion_masks:
+                part_mask = pg.mask.from_surface(part_surf)
+                deletion_mask = pg.mask.from_surface(parts[f'{outfit}_deletion_mask'])
+                overlap_mask = deletion_mask.overlap_mask(part_mask, (0, 0))
+                overlap_mask.to_surface(part_surf, unsetcolor=(0,0,0,0), setcolor=(255,0,0,255))
+                #parts[lower_outerwear] = pg.transform.smoothscale_by(parts[lower_outerwear], 1.05)
+                outline = [(p[0], p[1]) for p in overlap_mask.outline(1)]
+                print(f'outline={outline}')
+                #pg.draw.lines(parts[lower_outerwear], (255,0,0,255), True, outline, 1)
+                untouchable_surf = pg.image.load(resource_path(join('assets', 'img', 'character_parts', f'{lower_outerwear}.png'))).convert_alpha()
+                print(f'lower_outerwear ={lower_outerwear}')
+                untouchable_surf_low_res = pg.transform.smoothscale_by(untouchable_surf, .5)
+                untouchable_surf_low_res.blit(parts[lower_outerwear])
+                buffer = pg.PixelArray(untouchable_surf_low_res)
+                buffer = buffer.replace((255,0,0,255), (0,0,0,0))
+                del buffer
+                #path = filedialog.asksaveasfilename(defaultextension=".png")
+                #if path != "":
+                #    pg.image.save(untouchable_surf, path)
                 
-
-
+                surf.blit(untouchable_surf_low_res)
+            # Draw image
+            #surf.blit(part_surf)
+    # Draw arm
+        # Base
+        base = pg.mask.from_surface(parts['arm_base'])
+        surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[f'skin_{skin_color}']))
+        # Lineart
+        surf.blit(parts['arm_lineart'])
+    # Draw upper innerwear extra layer if applicable
+        if upper_innerwear in self.clothing_pieces_with_an_extra_layer:
+            # Single image
+            surf.blit(parts[f'{upper_innerwear}_extra_layer'])
+    # Draw upper outerwear if applicable
+        if self.upper_outerwear_idx != 0:
+            # Single image
+            surf.blit(parts[upper_outerwear])
+    # Draw outfit top layer if applicable
+        if outfit in self.clothing_pieces_with_an_extra_layer:
+            if outfit in self.clothing_pieces_that_match_eye_color:
+                # Base
+                base = pg.mask.from_surface(parts[f'{outfit}_top_base'])
+                surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[f'clothing_{eye_color}']))
+                # Lineart
+                surf.blit(parts[f'{outfit}_top_lineart'])
+            else: 
+                # Single image
+                surf.blit(parts[f'{outfit}_top'])
+    # Draw face
+        # Single image
+        surf.blit(parts[f'face_{eye_color}'])
+    # Draw ears/horns bottom layer if applicable
+        if ear_layer_count == 3:
+            # Base
+            base = pg.mask.from_surface(parts[f'{ears}_ears_bottom_base'])
+            surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[ear_color]))
+            # Lineart
+            surf.blit(parts[f'{ears}_ears_bottom_lineart'])
+        if has_horns:
+            # Single image
+            surf.blit(parts[f'{species}_horns_bottom'])
+    # Draw ears/horns middle layer if applicable
+        if hairstyle in self.hairstyles_that_show_middle_layer_of_ears:
+            if ear_layer_count == 3:
+                # Base
+                base = pg.mask.from_surface(parts[f'{ears}_ears_middle_base'])
+                surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[ear_color]))
+                # Lineart
+                surf.blit(parts[f'{ears}_ears_middle_lineart'])
+        if has_horns:
+            # Single image
+            surf.blit(parts[f'{species}_horns_middle'])
+    # Draw single-layer ears if applicable
+        if ear_layer_count == 1:
+            # Base
+            base = pg.mask.from_surface(parts[f'{ears}_ears_base'])
+            surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[ear_color]))
+            # Lineart
+            surf.blit(parts[f'{ears}_ears_lineart'])
+    # Draw outfit middle layer if applicable
+        if self.outfits_idx != 0:
+            if outfit in self.clothing_pieces_that_match_eye_color:
+                # Base
+                base = pg.mask.from_surface(parts[f'{outfit}_middle_base'])
+                surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[f'clothing_{eye_color}']))
+                # Lineart
+                surf.blit(parts[f'{outfit}_middle_lineart'])
+            else:
+                # Single image
+                surf.blit(parts[f'{outfit}_middle'])
+    # Draw hair middle layer
+        # Base
+        base = pg.mask.from_surface(parts[f'{hairstyle}_middle_base'])
+        surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[hair_color]))
+        # Transparent base if applicable
+        if hairstyle in self.hairstyles_with_a_transparent_base:
+            base = pg.mask.from_surface(parts[f'{hairstyle}_middle_transparent_base'])
+            surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=((self.color_dict[hair_color][0]),
+                                                                            (self.color_dict[hair_color][1]),
+                                                                            (self.color_dict[hair_color][2]),
+                                                                            127.5)))
+        # Lineart
+        surf.blit(parts[f'{hairstyle}_middle_lineart'])
+    # Draw ears/horns top layer
+        if ear_layer_count == 3:
+            # Base
+            base = pg.mask.from_surface(parts[f'{ears}_ears_top_base'])
+            surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[ear_color]))
+            # Lineart
+            surf.blit(parts[f'{ears}_ears_top_lineart'])
+        if has_horns:
+            # Single image
+            surf.blit(parts[f'{species}_horns_top'])
+    # Draw outfit front layer if applicable
+        if outfit in self.clothing_pieces_with_an_extra_layer:
+            # Single image
+            surf.blit(parts[f'{outfit}_top'])
+    # Draw hair front if applicable
+        if hairstyle in self.hairstyles_with_a_top_layer:
+            # Base
+            base = pg.mask.from_surface(parts[f'{hairstyle}_top_base'])
+            surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[hair_color]))
+            # Lineart
+            surf.blit(parts[f'{hairstyle}_top_lineart'])
+                
         data = pg.image.tobytes(surf, "RGBA")
-        final_surf = pg.image.frombytes(data, (w, h), "RGBA") # Low res
+        final_surf = pg.image.frombytes(data, (w, h), "RGBA")
         return final_surf
     
 class SplashArt(pg.sprite.Sprite):
