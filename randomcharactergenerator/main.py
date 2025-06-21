@@ -89,7 +89,7 @@ class Character(pg.sprite.Sprite):
         self.tails_with_skin_color = []
         self.clothing_pieces_with_an_extra_layer = ["turtleneck", "maid_dress", "techwear"]
         self.clothing_pieces_that_match_eye_color = ["cropped_hoodie_underbust", "cropped_hoodie_overbust"]
-        self.outfits_with_a_bottom_layer = ["jacket", "techwear"]
+        self.outfits_with_a_bottom_layer = ["jacket", "techwear", "floating_collar_and_cuffs"]
         self.outfits_with_deletion_masks = ["coat"]
         
         # Dictionary specifying colors for hair, skin, certain clothes
@@ -235,8 +235,10 @@ class Character(pg.sprite.Sprite):
         else: 
             w, h = self.low_res_w, self.low_res_h
             parts = self.character_parts_low_res
-    # Creates destination surface for drawing character parts to
+    # Creates initial surface
         surf = pg.Surface((w, h), pg.SRCALPHA) 
+        empty_surf = surf
+        
     # Store attributes
         
         # Misc.
@@ -295,6 +297,7 @@ class Character(pg.sprite.Sprite):
         outfit = self.outfits[self.outfits_idx]
         socks_and_leggings = self.socks_and_leggings[self.socks_and_leggings_idx]
         
+    ### Pre-face surf
     # Draw hair bottom layer if applicable
         if include_hair_bottom_layer:
             # Base
@@ -402,9 +405,19 @@ class Character(pg.sprite.Sprite):
             else: 
                 # Single image
                 surf.blit(parts[f'{outfit}_top'])
+    # Store and clear
+        pre_face_surf = surf
+        del surf
+        surf = empty_surf
+    ### Face surf
     # Draw face
         # Single image
         surf.blit(parts[f'face_{eye_color}'])
+    # Store face
+        face_surf = surf
+        del surf
+        surf = empty_surf
+    ### Post-face surf
     # Draw glasses if hair goes over glasses
         # Single image
         if hairstyle not in self.hairstyles_that_go_under_glasses and glasses in parts:
@@ -486,8 +499,16 @@ class Character(pg.sprite.Sprite):
             surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[hair_color]))
             # Lineart
             surf.blit(parts[f'{hairstyle}_top_lineart'])
+    # Store post-face surf
+        post_face_surf = surf
+        del surf
+    ### Combine surfs
+        dest_surf = empty_surf
+        dest_surf.blit(pre_face_surf)
+        dest_surf.blit(face_surf)
+        dest_surf.blit(post_face_surf)
                 
-        data = pg.image.tobytes(surf, "RGBA")
+        data = pg.image.tobytes(dest_surf, "RGBA")
         final_surf = pg.image.frombytes(data, (w, h), "RGBA")
         return final_surf
     
