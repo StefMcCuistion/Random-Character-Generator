@@ -11,7 +11,7 @@ def resize():
             im = Image.open(path+item)
             f, e = os.path.splitext(path+item)
             imResize = im.resize((1766,2514), Image.LANCZOS)
-            imResize.save(f + e)
+            #imResize.save(f + e)
 
 if __name__ == "__main__":
     resize()

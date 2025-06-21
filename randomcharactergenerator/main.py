@@ -47,7 +47,8 @@ class Character(pg.sprite.Sprite):
         self.character_parts_high_res = parts_high_res
         self.skin_colors = ["fair", "less_fair", "pale_brown", "medium_brown", "dark_brown", "black"]
         self.species = ["human", "cat", "dragon", "bunny"]
-        self.hairstyles = ["emo", "bubble_braid", "mohawk_with_curls", "straight_short", "straight_long", "spiky", "ponytail", "teto", "miku"]
+        self.hairstyles = ["emo", "bubble_braid", "mohawk_with_curls", "straight_short", "straight_long", "spiky", "ponytail", "teto", "miku",
+                           "nijika"]
         self.hair_colors = ["black", "blonde", "brown", "purple", "white", "pink_1", "pink_2", "red"]
         self.lower_innerwear = ["none", "lacy_black_panties", "microkini_bottom"]
         self.lower_outerwear = [
@@ -57,22 +58,25 @@ class Character(pg.sprite.Sprite):
         self.upper_innerwear = ["none", "microkini_top", "bralette", "turtleneck", "leotard"]
         self.upper_outerwear = ["none", "cropped_tank_dark", "cropped_tank_white_with_heart", "cropped_tee"]
         self.outfits = [
-                        "none", "jacket", "coat", "maid_dress", "floating_collar_and_cuffs", "cropped_hoodie_black", "cropped_hoodie_with_eye_color", 
+                        "none", "jacket", "coat", "floating_collar_and_cuffs", "cropped_hoodie_underbust_black", "cropped_hoodie_underbust", 
                         "trans_off_one_shoulder_crop", "white_off_one_shoulder_crop", "black_off_one_shoulder_crop",
-                        "techwear"
+                        "cropped_hoodie_overbust", "cropped_hoodie_overbust_split_tone", "x_sweater_black", "x_sweater_white", "lads_reduced", 
+                        "lads_full", "lads_corset",
                         ]
         self.socks_and_leggings = [
                                    "none", "black_thigh_high_socks", "knee_high_black_socks", "knee_high_black_socks_with_fishnet_leggings",
                                    "knee_high_black_socks_with_fishnet_thigh_highs", "knee_high_black_socks_with_pantyhose_leggings",
                                    "knee_high_black_socks_with_pantyhose_thigh_highs", "black_leggings", "fishnet_leggings", "pantyhose_leggings"
                                    ]
+        self.glasses = ["none", "sunglasses", "nerd_glasses", "bougie_glasses", "legally_distinct_kitty_glasses"]
         self.eye_colors = ["purple", "red", "blue", "green", "brown"]
         
         # Exceptions
-        self.hairstyles_with_a_back_layer = ["emo", "bubble_braid", "mohawk_with_curls", "short", "spiky", "ponytail", "straight_long"]
+        self.hairstyles_with_a_bottom_layer = ["emo", "bubble_braid", "mohawk_with_curls", "short", "spiky", "ponytail", "straight_long", "straight_short"]
         self.hairstyles_with_no_lineart_on_bottom_layer = ["emo", "straight_long"]
         self.hairstyles_with_a_top_layer = ["teto", "spiky", "bubble_braid"]
         self.hairstyles_with_a_transparent_base = ["mohawk_with_curls"]
+        self.hairstyles_that_go_under_glasses = ["ponytail", "spiky", "straight_long"]
         self.hairstyles_that_show_middle_layer_of_ears = []
         self.ears_with_three_layers = ["cat", "bunny"]
         self.ears_with_one_layer = ["human", "pointy"]
@@ -84,7 +88,7 @@ class Character(pg.sprite.Sprite):
         self.tails_with_hair_color = ["cat", "bunny"]
         self.tails_with_skin_color = []
         self.clothing_pieces_with_an_extra_layer = ["turtleneck", "maid_dress", "techwear"]
-        self.clothing_pieces_that_match_eye_color = ["cropped_hoodie_with_eye_color"]
+        self.clothing_pieces_that_match_eye_color = ["cropped_hoodie_underbust", "cropped_hoodie_overbust"]
         self.outfits_with_a_bottom_layer = ["jacket", "techwear"]
         self.outfits_with_deletion_masks = ["coat"]
         
@@ -106,7 +110,7 @@ class Character(pg.sprite.Sprite):
                            "white":  (232,236,240),
                            "pink_1": (255,190,253),
                            "pink_2": (255,191,218),
-                           "red":    "#893a42", 
+                           "red":    (137,58,66), 
                            
                            # Clothing that matches eye color
                            "clothing_purple": (166,142,236), 
@@ -137,6 +141,7 @@ class Character(pg.sprite.Sprite):
         self.socks_and_leggings_idx = 0
         self.upper_outerwear_idx = 0
         self.eye_colors_idx = 0
+        self.glasses_idx = 0
         
         # Initial appearance as question mark
         surf = self.character_parts_low_res['question_mark']
@@ -198,9 +203,10 @@ class Character(pg.sprite.Sprite):
         self.socks_and_leggings_idx = randint(0, len(self.socks_and_leggings) - 1)
         self.upper_outerwear_idx = randint(0, len(self.upper_outerwear) - 1)
         self.eye_colors_idx = randint(0, len(self.eye_colors) - 1)
-        # Prevents cropped shirt from being selected if a cropped hoodie is selected. 
-        if self.outfits[self.outfits_idx].startswith("cropped_hoodie"):
-            if self.upper_outerwear[self.upper_outerwear_idx] == "cropped_shirt":
+        self.glasses_idx = randint(0, len(self.glasses) -1)
+        # Overrides
+        if self.outfits[self.outfits_idx].startswith("cropped_hoodie") or self.outfits[self.outfits_idx].startswith("lads"):
+            if self.upper_outerwear[self.upper_outerwear_idx] == "cropped_tee":
                 self.upper_outerwear_idx = randint(0, len(self.upper_outerwear) - 2)
         elif self.outfits[self.outfits_idx] == "techwear":
             self.upper_outerwear_idx = 0
@@ -209,9 +215,6 @@ class Character(pg.sprite.Sprite):
             self.lower_innerwear_idx = 0
         if self.upper_innerwear[self.upper_innerwear_idx] == 'turtleneck':
             self.upper_outerwear_idx = 0
-        # Overwrites
-        self.outfits_idx = 2
-        self.lower_outerwear_idx = 2
             
     def change_appearance(self):
 
@@ -225,13 +228,14 @@ class Character(pg.sprite.Sprite):
         self.twitch_time_remaining = 1
         
     def return_image(self, high_res):
-        if not high_res:
-            w, h = self.low_res_w, self.low_res_h
-            parts = self.character_parts_low_res
-        else: 
+        # Picks appropriate image size
+        if high_res: 
             w, h = self.high_res_w, self.high_res_h
             parts = self.character_parts_high_res
-    # Draws character at desired res and returns it
+        else: 
+            w, h = self.low_res_w, self.low_res_h
+            parts = self.character_parts_low_res
+    # Creates destination surface for drawing character parts to
         surf = pg.Surface((w, h), pg.SRCALPHA) 
     # Store attributes
         
@@ -239,11 +243,12 @@ class Character(pg.sprite.Sprite):
         skin_color = self.skin_colors_idx + 1
         eye_color = self.eye_colors[self.eye_colors_idx]
         species = self.species[self.species_idx]
+        glasses = self.glasses[self.glasses_idx]
         
         # Hair
         hair_color = self.hair_colors[self.hair_colors_idx]
         hairstyle = self.hairstyles[self.hairstyles_idx]
-        if hairstyle in self.hairstyles_with_a_back_layer:
+        if hairstyle in self.hairstyles_with_a_bottom_layer:
             include_hair_bottom_layer = True
             if hairstyle in self.hairstyles_with_no_lineart_on_bottom_layer:
                 include_hair_bottom_layer_lineart = False
@@ -336,33 +341,42 @@ class Character(pg.sprite.Sprite):
             surf.blit(parts[upper_innerwear])
     # Draw lower outerwear (shorts/skirt/pants) if applicable
         if self.lower_outerwear_idx != 0:
-            # Store image
-            part_surf = parts[lower_outerwear]
-            part_surf_copy = part_surf
-            # Deletion mask if applicable
-            if outfit in self.outfits_with_deletion_masks:
-                part_mask = pg.mask.from_surface(part_surf)
-                deletion_mask = pg.mask.from_surface(parts[f'{outfit}_deletion_mask'])
-                overlap_mask = deletion_mask.overlap_mask(part_mask, (0, 0))
-                overlap_mask.to_surface(part_surf, unsetcolor=(0,0,0,0), setcolor=(255,0,0,255))
-                #parts[lower_outerwear] = pg.transform.smoothscale_by(parts[lower_outerwear], 1.05)
-                outline = [(p[0], p[1]) for p in overlap_mask.outline(1)]
-                print(f'outline={outline}')
-                #pg.draw.lines(parts[lower_outerwear], (255,0,0,255), True, outline, 1)
-                untouchable_surf = pg.image.load(resource_path(join('assets', 'img', 'character_parts', f'{lower_outerwear}.png'))).convert_alpha()
-                print(f'lower_outerwear ={lower_outerwear}')
-                untouchable_surf_low_res = pg.transform.smoothscale_by(untouchable_surf, .5)
-                untouchable_surf_low_res.blit(parts[lower_outerwear])
-                buffer = pg.PixelArray(untouchable_surf_low_res)
-                buffer = buffer.replace((255,0,0,255), (0,0,0,0))
-                del buffer
-                #path = filedialog.asksaveasfilename(defaultextension=".png")
-                #if path != "":
-                #    pg.image.save(untouchable_surf, path)
+            if False: # Deletion mask approach, not yet functional
+                # Store image
+                part_surf = parts[lower_outerwear]
+                part_surf_copy = part_surf
+                # Deletion mask if applicable
+                # This is a MESS right now. And not fully functional. It's on the TODO
+                if outfit in self.outfits_with_deletion_masks:
+                    part_mask = pg.mask.from_surface(part_surf)
+                    deletion_mask = pg.mask.from_surface(parts[f'{outfit}_deletion_mask'])
+                    overlap_mask = deletion_mask.overlap_mask(part_mask, (0, 0))
+                    overlap_mask.to_surface(part_surf, unsetcolor=(0,0,0,0), setcolor=(255,0,0,255))
+                    #parts[lower_outerwear] = pg.transform.smoothscale_by(parts[lower_outerwear], 1.05)
+                    #outline = overlap_mask.outline(1)
+                    #print(f'outline={outline}')
+                    #pg.draw.lines(parts[lower_outerwear], (255,0,0,255), True, outline, 1)
+                    untouchable_surf = pg.image.load(resource_path(join('assets', 'img', 'character_parts', f'{lower_outerwear}.png'))).convert_alpha()
+                    print(f'lower_outerwear ={lower_outerwear}')
+                    untouchable_surf_low_res = pg.transform.smoothscale_by(untouchable_surf, .5)
+                    untouchable_surf_low_res.blit(parts[lower_outerwear])
+                    buffer = pg.PixelArray(untouchable_surf_low_res)
+                    buffer = buffer.replace((255,0,0,255), (0,0,0,0))
+                    del buffer
+                    restored_surf = pg.image.load(resource_path(join('assets', 'img', 'character_parts', f'{lower_outerwear}.png'))).convert_alpha()
+                    self.character_parts_high_res[lower_outerwear] = restored_surf
+                    self.character_parts_low_res[lower_outerwear] = pg.transform.smoothscale_by(restored_surf, .5)
+                    #path = filedialog.asksaveasfilename(defaultextension=".png")
+                    #if path != "":
+                    #    pg.image.save(untouchable_surf, path)
+                    surf.blit(untouchable_surf_low_res)
+                    # Draw image
+                    #surf.blit(part_surf)
+
+            else: # Normal approach, allows clipping on certain outfits with certail lower outerwear
+                # Single image
+                surf.blit(parts[lower_outerwear])
                 
-                surf.blit(untouchable_surf_low_res)
-            # Draw image
-            #surf.blit(part_surf)
     # Draw arm
         # Base
         base = pg.mask.from_surface(parts['arm_base'])
@@ -391,6 +405,10 @@ class Character(pg.sprite.Sprite):
     # Draw face
         # Single image
         surf.blit(parts[f'face_{eye_color}'])
+    # Draw glasses if hair goes over glasses
+        # Single image
+        if hairstyle not in self.hairstyles_that_go_under_glasses and glasses in parts:
+            surf.blit(parts[glasses])
     # Draw ears/horns bottom layer if applicable
         if ear_layer_count == 3:
             # Base
@@ -443,6 +461,10 @@ class Character(pg.sprite.Sprite):
                                                                             127.5)))
         # Lineart
         surf.blit(parts[f'{hairstyle}_middle_lineart'])
+    # Draw glasses if hair goes under glasses
+        # Single image
+        if hairstyle in self.hairstyles_that_go_under_glasses and glasses in parts:
+            surf.blit(parts[glasses])
     # Draw ears/horns top layer
         if ear_layer_count == 3:
             # Base
@@ -1130,6 +1152,7 @@ class Game:
             self.about_sprites.draw(self.display)
             self.about_sprites.update(self.display)
             pg.display.flip()
+        pg.quit()
 
     def play(self):
         
