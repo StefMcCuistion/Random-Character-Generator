@@ -193,8 +193,13 @@ class Character(pg.sprite.Sprite):
             self.w -= numpy.sin(breathing_speed * self.tick) * breathing_magnitude
             self.h += numpy.sin(breathing_speed * self.tick) * breathing_magnitude * .5
             self.image = pg.transform.smoothscale(self.appearance, (self.w, self.h))
-            self.rect = self.image.get_frect(centerx = self.rect.centerx, bottom = self.zoom_rect.bottom)
+            self.rect = self.image.get_frect(centerx = self.rect.centerx, bottom = self.zoom_rect.bottom)    
             
+    def check_for_input(self):
+        pos = (pg.mouse.get_pos())
+        if pos[0] in (range(int(self.rect.left), int(self.rect.right))) and pos[1] in range(int(self.rect.top), int(self.rect.bottom)):
+            return 1
+
         # Blink
         blink_frequency = 1
         blink_length = .004
@@ -207,8 +212,6 @@ class Character(pg.sprite.Sprite):
             if self.blinking == True: 
                 self.appearance = self.character_surfs[0]
                 self.blinking = False
-        print(f'blink wave = {blink_wave}')                
-        print(f'blinking = {self.blinking}')                
 
     def randomize_attributes(self):
         self.skin_colors_idx = randint(0, len(self.skin_colors) - 1)
@@ -247,6 +250,7 @@ class Character(pg.sprite.Sprite):
         self.twitch_time_remaining = 1
         
     def return_image(self, high_res):
+        sans = randint(0, 500)
         # Picks appropriate image size
         if high_res: 
             w, h = self.high_res_w, self.high_res_h
@@ -254,282 +258,290 @@ class Character(pg.sprite.Sprite):
         else: 
             w, h = self.low_res_w, self.low_res_h
             parts = self.character_parts_low_res
-    # Creates initial surface
-        surf = pg.Surface((w, h), pg.SRCALPHA) 
-        empty_surf = surf
-        
-    # Store attributes
-        
-        # Misc.
-        skin_color = self.skin_colors_idx + 1
-        eye_color = self.eye_colors[self.eye_colors_idx]
-        species = self.species[self.species_idx]
-        glasses = self.glasses[self.glasses_idx]
-        
-        # Hair
-        hair_color = self.hair_colors[self.hair_colors_idx]
-        hairstyle = self.hairstyles[self.hairstyles_idx]
-        if hairstyle in self.hairstyles_with_a_bottom_layer:
-            include_hair_bottom_layer = True
-            if hairstyle in self.hairstyles_with_no_lineart_on_bottom_layer:
-                include_hair_bottom_layer_lineart = False
+        # One in 500 chance of sans
+        if sans == 1:
+            surf = pg.Surface((w, h), pg.SRCALPHA) 
+            surf.blit(parts['a_skeleton'])
+            surfs = [surf, surf]
+            return surfs
+        # Otherwise, draw character
+        else: 
+        # Creates initial surface
+            surf = pg.Surface((w, h), pg.SRCALPHA) 
+            empty_surf = surf
+            
+        # Store attributes
+            
+            # Misc.
+            skin_color = self.skin_colors_idx + 1
+            eye_color = self.eye_colors[self.eye_colors_idx]
+            species = self.species[self.species_idx]
+            glasses = self.glasses[self.glasses_idx]
+            
+            # Hair
+            hair_color = self.hair_colors[self.hair_colors_idx]
+            hairstyle = self.hairstyles[self.hairstyles_idx]
+            if hairstyle in self.hairstyles_with_a_bottom_layer:
+                include_hair_bottom_layer = True
+                if hairstyle in self.hairstyles_with_no_lineart_on_bottom_layer:
+                    include_hair_bottom_layer_lineart = False
+                else: 
+                    include_hair_bottom_layer_lineart = True
             else: 
-                include_hair_bottom_layer_lineart = True
-        else: 
-            include_hair_bottom_layer = False
-            include_hair_bottom_layer_lineart = False
-        
-        # Ears
-        if species in self.species_with_human_ears:
-            ears = "human"
-            ear_color = f"skin_{skin_color}"
-            ear_layer_count = 1
-        else:
-            ears = species
-            ear_color = hair_color
-            ear_layer_count = 3
+                include_hair_bottom_layer = False
+                include_hair_bottom_layer_lineart = False
             
-        # Horns
-        if species in self.species_with_horns:
-            has_horns = True
-        else: 
-            has_horns = False
-            
-        # Tail
-        if species in self.species_with_tails:
-            has_a_tail = True
-            tail = species
-        else: 
-            has_a_tail = False
-            tail = ""
-        if tail in self.tails_with_hair_color:
-            tail_color = hair_color
-        elif tail in self.tails_with_skin_color:
-            tail_color = skin_color
-        else:
-            tail_color = "unique"
-        
-        lower_innerwear = self.lower_innerwear[self.lower_innerwear_idx]
-        lower_outerwear = self.lower_outerwear[self.lower_outerwear_idx]
-        upper_innerwear = self.upper_innerwear[self.upper_innerwear_idx]
-        upper_outerwear = self.upper_outerwear[self.upper_outerwear_idx]
-        outfit = self.outfits[self.outfits_idx]
-        socks_and_leggings = self.socks_and_leggings[self.socks_and_leggings_idx]
-        
-    # Store blinking face surf
-        blinking_face_surf = parts['face_blinking']
-        
-    ### Pre-face surf
-    # Draw hair bottom layer if applicable
-        if include_hair_bottom_layer:
-            # Base
-            base = pg.mask.from_surface(parts[f'{hairstyle}_bottom_base'])
-            surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[hair_color]))
-            # Lineart if applicable
-            if include_hair_bottom_layer_lineart:
-                surf.blit(parts[f'{hairstyle}_bottom_lineart'])
-    # Draw outfit bottom layer if applicable
-        if outfit in self.outfits_with_a_bottom_layer:
-            # Single image
-            surf.blit(parts[f'{outfit}_bottom'])
-    # Draw tail
-        if has_a_tail:
-            if tail_color == "unique":
-                # Single image
-                surf.blit(parts[f'{tail}_tail'])
+            # Ears
+            if species in self.species_with_human_ears:
+                ears = "human"
+                ear_color = f"skin_{skin_color}"
+                ear_layer_count = 1
             else:
-                # Base
-                base = pg.mask.from_surface(parts[f'{tail}_tail_base'])
-                surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[tail_color]))
-                # Lineart
-                surf.blit(parts[f'{tail}_tail_lineart'])
-    # Draw body
-        # Base
-        base = pg.mask.from_surface(parts['body_base'])
-        surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[f'skin_{skin_color}']))
-        # Blush base
-        base = pg.mask.from_surface(parts['blush_base'])
-        surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[f'blush_{skin_color}']))
-        # Lineart
-        surf.blit(parts['body_lineart'])
-    # Draw lower innerwear (panties) if applicable]
-        if self.lower_innerwear_idx != 0:
-            # Single image
-            surf.blit(parts[lower_innerwear])
-    # Draw socks/leggings if applicable
-        if self.socks_and_leggings_idx != 0:
-            # Single image
-            surf.blit(parts[socks_and_leggings])
-    # Draw upper innerwear (bra) if applicable
-        if self.upper_innerwear_idx != 0:
-            # Single image
-            surf.blit(parts[upper_innerwear])
-    # Draw outfit extra layer if applicable
-        if outfit in self.clothing_pieces_with_an_extra_layer:
-            # Single image
-            surf.blit(parts[f'{outfit}_extra'])
-    # Draw lower outerwear (shorts/skirt/pants) if applicable
-        if self.lower_outerwear_idx != 0:
-            if False: # Deletion mask approach, not yet functional
-                # Store image
-                part_surf = parts[lower_outerwear]
-                part_surf_copy = part_surf
-                # Deletion mask if applicable
-                # This is a MESS right now. And not fully functional. It's on the TODO
-                if outfit in self.outfits_with_deletion_masks:
-                    part_mask = pg.mask.from_surface(part_surf)
-                    deletion_mask = pg.mask.from_surface(parts[f'{outfit}_deletion_mask'])
-                    overlap_mask = deletion_mask.overlap_mask(part_mask, (0, 0))
-                    overlap_mask.to_surface(part_surf, unsetcolor=(0,0,0,0), setcolor=(255,0,0,255))
-                    #parts[lower_outerwear] = pg.transform.smoothscale_by(parts[lower_outerwear], 1.05)
-                    #outline = overlap_mask.outline(1)
-                    #print(f'outline={outline}')
-                    #pg.draw.lines(parts[lower_outerwear], (255,0,0,255), True, outline, 1)
-                    untouchable_surf = pg.image.load(resource_path(join('assets', 'img', 'character_parts', f'{lower_outerwear}.png'))).convert_alpha()
-                    print(f'lower_outerwear ={lower_outerwear}')
-                    untouchable_surf_low_res = pg.transform.smoothscale_by(untouchable_surf, .5)
-                    untouchable_surf_low_res.blit(parts[lower_outerwear])
-                    buffer = pg.PixelArray(untouchable_surf_low_res)
-                    buffer = buffer.replace((255,0,0,255), (0,0,0,0))
-                    del buffer
-                    restored_surf = pg.image.load(resource_path(join('assets', 'img', 'character_parts', f'{lower_outerwear}.png'))).convert_alpha()
-                    self.character_parts_high_res[lower_outerwear] = restored_surf
-                    self.character_parts_low_res[lower_outerwear] = pg.transform.smoothscale_by(restored_surf, .5)
-                    #path = filedialog.asksaveasfilename(defaultextension=".png")
-                    #if path != "":
-                    #    pg.image.save(untouchable_surf, path)
-                    surf.blit(untouchable_surf_low_res)
-                    # Draw image
-                    #surf.blit(part_surf)
-
-            else: # Normal approach, allows clipping on certain outfits with certail lower outerwear
-                # Single image
-                surf.blit(parts[lower_outerwear])
+                ears = species
+                ear_color = hair_color
+                ear_layer_count = 3
                 
-    # Draw arm
-        # Base
-        base = pg.mask.from_surface(parts['arm_base'])
-        surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[f'skin_{skin_color}']))
-        # Lineart
-        surf.blit(parts['arm_lineart'])
-    # Draw upper innerwear extra layer if applicable
-        if upper_innerwear in self.clothing_pieces_with_an_extra_layer:
-            # Single image
-            surf.blit(parts[f'{upper_innerwear}_extra'])
-    # Draw upper outerwear if applicable
-        if self.upper_outerwear_idx != 0:
-            # Single image
-            surf.blit(parts[upper_outerwear])
-        pre_face_surf = surf
-        del surf
-        surf = pg.Surface((w, h), pg.SRCALPHA) 
-    ### Face surf
-    # Draw face
-        # Single image
-        surf.blit(parts[f'face_{eye_color}'])
-    # Store face
-        not_blinking_face_surf = surf
-        del surf
-        surf = pg.Surface((w, h), pg.SRCALPHA) 
-    ### Post-face surf
-    # Draw glasses if hair goes over glasses
-        # Single image
-        if hairstyle not in self.hairstyles_that_go_under_glasses and glasses in parts:
-            surf.blit(parts[glasses])
-    # Draw ears/horns bottom layer if applicable
-        if ear_layer_count == 3:
+            # Horns
+            if species in self.species_with_horns:
+                has_horns = True
+            else: 
+                has_horns = False
+                
+            # Tail
+            if species in self.species_with_tails:
+                has_a_tail = True
+                tail = species
+            else: 
+                has_a_tail = False
+                tail = ""
+            if tail in self.tails_with_hair_color:
+                tail_color = hair_color
+            elif tail in self.tails_with_skin_color:
+                tail_color = skin_color
+            else:
+                tail_color = "unique"
+            
+            lower_innerwear = self.lower_innerwear[self.lower_innerwear_idx]
+            lower_outerwear = self.lower_outerwear[self.lower_outerwear_idx]
+            upper_innerwear = self.upper_innerwear[self.upper_innerwear_idx]
+            upper_outerwear = self.upper_outerwear[self.upper_outerwear_idx]
+            outfit = self.outfits[self.outfits_idx]
+            socks_and_leggings = self.socks_and_leggings[self.socks_and_leggings_idx]
+            
+        # Store blinking face surf
+            blinking_face_surf = parts['face_blinking']
+            
+        ### Pre-face surf
+        # Draw hair bottom layer if applicable
+            if include_hair_bottom_layer:
+                # Base
+                base = pg.mask.from_surface(parts[f'{hairstyle}_bottom_base'])
+                surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[hair_color]))
+                # Lineart if applicable
+                if include_hair_bottom_layer_lineart:
+                    surf.blit(parts[f'{hairstyle}_bottom_lineart'])
+        # Draw outfit bottom layer if applicable
+            if outfit in self.outfits_with_a_bottom_layer:
+                # Single image
+                surf.blit(parts[f'{outfit}_bottom'])
+        # Draw tail
+            if has_a_tail:
+                if tail_color == "unique":
+                    # Single image
+                    surf.blit(parts[f'{tail}_tail'])
+                else:
+                    # Base
+                    base = pg.mask.from_surface(parts[f'{tail}_tail_base'])
+                    surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[tail_color]))
+                    # Lineart
+                    surf.blit(parts[f'{tail}_tail_lineart'])
+        # Draw body
             # Base
-            base = pg.mask.from_surface(parts[f'{ears}_ears_bottom_base'])
-            surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[ear_color]))
+            base = pg.mask.from_surface(parts['body_base'])
+            surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[f'skin_{skin_color}']))
+            # Blush base
+            base = pg.mask.from_surface(parts['blush_base'])
+            surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[f'blush_{skin_color}']))
             # Lineart
-            surf.blit(parts[f'{ears}_ears_bottom_lineart'])
-        if has_horns:
+            surf.blit(parts['body_lineart'])
+        # Draw lower innerwear (panties) if applicable]
+            if self.lower_innerwear_idx != 0:
+                # Single image
+                surf.blit(parts[lower_innerwear])
+        # Draw socks/leggings if applicable
+            if self.socks_and_leggings_idx != 0:
+                # Single image
+                surf.blit(parts[socks_and_leggings])
+        # Draw upper innerwear (bra) if applicable
+            if self.upper_innerwear_idx != 0:
+                # Single image
+                surf.blit(parts[upper_innerwear])
+        # Draw outfit extra layer if applicable
+            if outfit in self.clothing_pieces_with_an_extra_layer:
+                # Single image
+                surf.blit(parts[f'{outfit}_extra'])
+        # Draw lower outerwear (shorts/skirt/pants) if applicable
+            if self.lower_outerwear_idx != 0:
+                if False: # Deletion mask approach, not yet functional
+                    # Store image
+                    part_surf = parts[lower_outerwear]
+                    part_surf_copy = part_surf
+                    # Deletion mask if applicable
+                    # This is a MESS right now. And not fully functional. It's on the TODO
+                    if outfit in self.outfits_with_deletion_masks:
+                        part_mask = pg.mask.from_surface(part_surf)
+                        deletion_mask = pg.mask.from_surface(parts[f'{outfit}_deletion_mask'])
+                        overlap_mask = deletion_mask.overlap_mask(part_mask, (0, 0))
+                        overlap_mask.to_surface(part_surf, unsetcolor=(0,0,0,0), setcolor=(255,0,0,255))
+                        #parts[lower_outerwear] = pg.transform.smoothscale_by(parts[lower_outerwear], 1.05)
+                        #outline = overlap_mask.outline(1)
+                        #print(f'outline={outline}')
+                        #pg.draw.lines(parts[lower_outerwear], (255,0,0,255), True, outline, 1)
+                        untouchable_surf = pg.image.load(resource_path(join('assets', 'img', 'character_parts', f'{lower_outerwear}.png'))).convert_alpha()
+                        print(f'lower_outerwear ={lower_outerwear}')
+                        untouchable_surf_low_res = pg.transform.smoothscale_by(untouchable_surf, .5)
+                        untouchable_surf_low_res.blit(parts[lower_outerwear])
+                        buffer = pg.PixelArray(untouchable_surf_low_res)
+                        buffer = buffer.replace((255,0,0,255), (0,0,0,0))
+                        del buffer
+                        restored_surf = pg.image.load(resource_path(join('assets', 'img', 'character_parts', f'{lower_outerwear}.png'))).convert_alpha()
+                        self.character_parts_high_res[lower_outerwear] = restored_surf
+                        self.character_parts_low_res[lower_outerwear] = pg.transform.smoothscale_by(restored_surf, .5)
+                        #path = filedialog.asksaveasfilename(defaultextension=".png")
+                        #if path != "":
+                        #    pg.image.save(untouchable_surf, path)
+                        surf.blit(untouchable_surf_low_res)
+                        # Draw image
+                        #surf.blit(part_surf)
+
+                else: # Normal approach, allows clipping on certain outfits with certail lower outerwear
+                    # Single image
+                    surf.blit(parts[lower_outerwear])
+                    
+        # Draw arm
+            # Base
+            base = pg.mask.from_surface(parts['arm_base'])
+            surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[f'skin_{skin_color}']))
+            # Lineart
+            surf.blit(parts['arm_lineart'])
+        # Draw upper innerwear extra layer if applicable
+            if upper_innerwear in self.clothing_pieces_with_an_extra_layer:
+                # Single image
+                surf.blit(parts[f'{upper_innerwear}_extra'])
+        # Draw upper outerwear if applicable
+            if self.upper_outerwear_idx != 0:
+                # Single image
+                surf.blit(parts[upper_outerwear])
+            pre_face_surf = surf
+            del surf
+            surf = pg.Surface((w, h), pg.SRCALPHA) 
+        ### Face surf
+        # Draw face
             # Single image
-            surf.blit(parts[f'{species}_horns_bottom'])
-    # Draw ears/horns middle layer if applicable
-        if hairstyle in self.hairstyles_that_show_middle_layer_of_ears:
+            surf.blit(parts[f'face_{eye_color}'])
+        # Store face
+            not_blinking_face_surf = surf
+            del surf
+            surf = pg.Surface((w, h), pg.SRCALPHA) 
+        ### Post-face surf
+        # Draw glasses if hair goes over glasses
+            # Single image
+            if hairstyle not in self.hairstyles_that_go_under_glasses and glasses in parts:
+                surf.blit(parts[glasses])
+        # Draw ears/horns bottom layer if applicable
             if ear_layer_count == 3:
                 # Base
-                base = pg.mask.from_surface(parts[f'{ears}_ears_middle_base'])
+                base = pg.mask.from_surface(parts[f'{ears}_ears_bottom_base'])
                 surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[ear_color]))
                 # Lineart
-                surf.blit(parts[f'{ears}_ears_middle_lineart'])
-        if has_horns:
-            # Single image
-            surf.blit(parts[f'{species}_horns_middle'])
-    # Draw single-layer ears if applicable
-        if ear_layer_count == 1:
-            # Base
-            base = pg.mask.from_surface(parts[f'{ears}_ears_base'])
-            surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[ear_color]))
-            # Lineart
-            surf.blit(parts[f'{ears}_ears_lineart'])
-    # Draw outfit middle layer if applicable
-        if self.outfits_idx != 0:
-            if outfit in self.clothing_pieces_that_match_eye_color:
-                # Base
-                base = pg.mask.from_surface(parts[f'{outfit}_middle_base'])
-                surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[f'clothing_{eye_color}']))
-                # Lineart
-                surf.blit(parts[f'{outfit}_middle_lineart'])
-            else:
+                surf.blit(parts[f'{ears}_ears_bottom_lineart'])
+            if has_horns:
                 # Single image
-                surf.blit(parts[f'{outfit}_middle'])
-    # Draw hair middle layer
-        # Base
-        base = pg.mask.from_surface(parts[f'{hairstyle}_middle_base'])
-        surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[hair_color]))
-        # Transparent base if applicable
-        if hairstyle in self.hairstyles_with_a_transparent_base:
-            base = pg.mask.from_surface(parts[f'{hairstyle}_middle_transparent_base'])
-            surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=((self.color_dict[hair_color][0]),
-                                                                            (self.color_dict[hair_color][1]),
-                                                                            (self.color_dict[hair_color][2]),
-                                                                            127.5)))
-        # Lineart
-        surf.blit(parts[f'{hairstyle}_middle_lineart'])
-    # Draw glasses if hair goes under glasses
-        # Single image
-        if hairstyle in self.hairstyles_that_go_under_glasses and glasses in parts:
-            surf.blit(parts[glasses])
-    # Draw ears/horns top layer
-        if ear_layer_count == 3:
+                surf.blit(parts[f'{species}_horns_bottom'])
+        # Draw ears/horns middle layer if applicable
+            if hairstyle in self.hairstyles_that_show_middle_layer_of_ears:
+                if ear_layer_count == 3:
+                    # Base
+                    base = pg.mask.from_surface(parts[f'{ears}_ears_middle_base'])
+                    surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[ear_color]))
+                    # Lineart
+                    surf.blit(parts[f'{ears}_ears_middle_lineart'])
+            if has_horns:
+                # Single image
+                surf.blit(parts[f'{species}_horns_middle'])
+        # Draw single-layer ears if applicable
+            if ear_layer_count == 1:
+                # Base
+                base = pg.mask.from_surface(parts[f'{ears}_ears_base'])
+                surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[ear_color]))
+                # Lineart
+                surf.blit(parts[f'{ears}_ears_lineart'])
+        # Draw outfit middle layer if applicable
+            if self.outfits_idx != 0:
+                if outfit in self.clothing_pieces_that_match_eye_color:
+                    # Base
+                    base = pg.mask.from_surface(parts[f'{outfit}_middle_base'])
+                    surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[f'clothing_{eye_color}']))
+                    # Lineart
+                    surf.blit(parts[f'{outfit}_middle_lineart'])
+                else:
+                    # Single image
+                    surf.blit(parts[f'{outfit}_middle'])
+        # Draw hair middle layer
             # Base
-            base = pg.mask.from_surface(parts[f'{ears}_ears_top_base'])
-            surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[ear_color]))
-            # Lineart
-            surf.blit(parts[f'{ears}_ears_top_lineart'])
-        if has_horns:
-            # Single image
-            surf.blit(parts[f'{species}_horns_top'])
-    # Draw hair front if applicable
-        if hairstyle in self.hairstyles_with_a_top_layer:
-            # Base
-            base = pg.mask.from_surface(parts[f'{hairstyle}_top_base'])
+            base = pg.mask.from_surface(parts[f'{hairstyle}_middle_base'])
             surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[hair_color]))
+            # Transparent base if applicable
+            if hairstyle in self.hairstyles_with_a_transparent_base:
+                base = pg.mask.from_surface(parts[f'{hairstyle}_middle_transparent_base'])
+                surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=((self.color_dict[hair_color][0]),
+                                                                                (self.color_dict[hair_color][1]),
+                                                                                (self.color_dict[hair_color][2]),
+                                                                                127.5)))
             # Lineart
-            surf.blit(parts[f'{hairstyle}_top_lineart'])
-    # Store post-face surf
-        post_face_surf = surf
-        del surf
-    ### Combine surfs
-        character_surf_not_blinking = pg.Surface((w, h), pg.SRCALPHA) 
-        character_surf_not_blinking.blit(pre_face_surf)
-        character_surf_not_blinking.blit(not_blinking_face_surf)
-        character_surf_not_blinking.blit(post_face_surf)
-        
-        character_surf_blinking = pg.Surface((w, h), pg.SRCALPHA) 
-        character_surf_blinking.blit(pre_face_surf)
-        character_surf_blinking.blit(parts['face_blinking'])
-        character_surf_blinking.blit(post_face_surf)
-        
-                
-        not_blinking_data = pg.image.tobytes(character_surf_not_blinking, "RGBA")
-        not_blinking_final = pg.image.frombytes(not_blinking_data, (w, h), "RGBA")
-        blinking_data = pg.image.tobytes(character_surf_blinking, "RGBA")
-        blinking_final = pg.image.frombytes(blinking_data, (w, h), "RGBA")
-        character_surfs = [not_blinking_final, blinking_final]
-        return character_surfs
+            surf.blit(parts[f'{hairstyle}_middle_lineart'])
+        # Draw glasses if hair goes under glasses
+            # Single image
+            if hairstyle in self.hairstyles_that_go_under_glasses and glasses in parts:
+                surf.blit(parts[glasses])
+        # Draw ears/horns top layer
+            if ear_layer_count == 3:
+                # Base
+                base = pg.mask.from_surface(parts[f'{ears}_ears_top_base'])
+                surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[ear_color]))
+                # Lineart
+                surf.blit(parts[f'{ears}_ears_top_lineart'])
+            if has_horns:
+                # Single image
+                surf.blit(parts[f'{species}_horns_top'])
+        # Draw hair front if applicable
+            if hairstyle in self.hairstyles_with_a_top_layer:
+                # Base
+                base = pg.mask.from_surface(parts[f'{hairstyle}_top_base'])
+                surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[hair_color]))
+                # Lineart
+                surf.blit(parts[f'{hairstyle}_top_lineart'])
+        # Store post-face surf
+            post_face_surf = surf
+            del surf
+        ### Combine surfs
+            character_surf_not_blinking = pg.Surface((w, h), pg.SRCALPHA) 
+            character_surf_not_blinking.blit(pre_face_surf)
+            character_surf_not_blinking.blit(not_blinking_face_surf)
+            character_surf_not_blinking.blit(post_face_surf)
+            
+            character_surf_blinking = pg.Surface((w, h), pg.SRCALPHA) 
+            character_surf_blinking.blit(pre_face_surf)
+            character_surf_blinking.blit(parts['face_blinking'])
+            character_surf_blinking.blit(post_face_surf)
+            
+                    
+            not_blinking_data = pg.image.tobytes(character_surf_not_blinking, "RGBA")
+            not_blinking_final = pg.image.frombytes(not_blinking_data, (w, h), "RGBA")
+            blinking_data = pg.image.tobytes(character_surf_blinking, "RGBA")
+            blinking_final = pg.image.frombytes(blinking_data, (w, h), "RGBA")
+            character_surfs = [not_blinking_final, blinking_final]
+            return character_surfs
     
 class SplashArt(pg.sprite.Sprite):
     def __init__(self, groups, surf, pos):
@@ -970,10 +982,12 @@ class Game:
         self.sfx_save_image = pg.mixer.Sound(resource_path(join('assets', 'audio', 'sfx', 'Minimalist13.ogg')))
         self.sfx_randomize = pg.mixer.Sound(resource_path(join('assets', 'audio', 'sfx', 'Minimalist9.ogg')))
         self.sfx_invalid = pg.mixer.Sound(resource_path(join('assets', 'audio', 'sfx', 'Invalid.mp3')))
+        self.sfx_squeak = pg.mixer.Sound(resource_path(join('assets', 'audio', 'sfx', 'squeak.mp3')))
         self.sfx_button_click.set_volume((self.user_settings['Master Volume'] / 100) * (self.user_settings['SFX Volume'] / 100))
         self.sfx_save_image.set_volume((self.user_settings['Master Volume'] / 100) * (self.user_settings['SFX Volume'] / 100))
         self.sfx_randomize.set_volume((self.user_settings['Master Volume'] / 100) * (self.user_settings['SFX Volume'] / 100))
         self.sfx_invalid.set_volume((self.user_settings['Master Volume'] / 100) * (self.user_settings['SFX Volume'] / 100))
+        self.sfx_squeak.set_volume((self.user_settings['Master Volume'] / 100) * (self.user_settings['SFX Volume'] / 100) * .3)
         
         # Imports: Icon
         
@@ -1031,7 +1045,7 @@ class Game:
                 if event.type == pg.KEYDOWN:
                     if event.key == pg.K_ESCAPE:
                         self.running = False
-                if event.type == pg.MOUSEBUTTONDOWN:
+                if event.type == pg.MOUSEBUTTONDOWN and pg.mouse.get_pressed()[0]:
                     if start_button.check_for_input():
                         self.sfx_button_click.play()
                         for sprite in self.start_sprites:
@@ -1098,7 +1112,7 @@ class Game:
                 if event.type == pg.KEYDOWN:
                     if event.key == pg.K_ESCAPE:
                         self.running = False
-                if event.type == pg.MOUSEBUTTONDOWN:
+                if event.type == pg.MOUSEBUTTONDOWN and pg.mouse.get_pressed()[0]:
                     if return_button.check_for_input():
                         self.sfx_button_click.play()
                         with open((resource_path(join('user settings', 'user_settings.csv'))), 'w') as settings_file:
@@ -1119,19 +1133,19 @@ class Game:
 
             
             # Update User Settings
-            if pg.mouse.get_pressed()[0]:
-                self.user_settings['Fullscreen'] = fullscreen_checkbox.give_state()
-                self.user_settings['Master Volume'] = master_volume_slider.give_idx()
-                self.user_settings['Music Volume'] = music_volume_slider.give_idx()
-                self.user_settings['SFX Volume'] = sfx_volume_slider.give_idx()
-                music_volume = (self.user_settings['Master Volume'] / 100) * (self.user_settings['Music Volume'] / 100)
-                sfx_volume = (self.user_settings['Master Volume'] / 100) * (self.user_settings['SFX Volume'] / 100)
+            self.user_settings['Fullscreen'] = fullscreen_checkbox.give_state()
+            self.user_settings['Master Volume'] = master_volume_slider.give_idx()
+            self.user_settings['Music Volume'] = music_volume_slider.give_idx()
+            self.user_settings['SFX Volume'] = sfx_volume_slider.give_idx()
+            music_volume = (self.user_settings['Master Volume'] / 100) * (self.user_settings['Music Volume'] / 100)
+            sfx_volume = (self.user_settings['Master Volume'] / 100) * (self.user_settings['SFX Volume'] / 100)
 
             pg.mixer.music.set_volume(music_volume)
             self.sfx_button_click.set_volume(sfx_volume)
             self.sfx_save_image.set_volume(sfx_volume)
             self.sfx_randomize.set_volume(sfx_volume)
             self.sfx_invalid.set_volume(sfx_volume)
+            self.sfx_squeak.set_volume(sfx_volume * .3)
 
             # Render
             self.display.blit(options_bg)
@@ -1168,7 +1182,7 @@ class Game:
                 if event.type == pg.KEYDOWN:
                     if event.key == pg.K_ESCAPE:
                         self.running = False
-                if event.type == pg.MOUSEBUTTONDOWN:
+                if event.type == pg.MOUSEBUTTONDOWN and pg.mouse.get_pressed()[0]:
                     if patreon_button.check_for_input():
                         webbrowser.open('https://www.patreon.com/c/stekken')
                     if twitter_button.check_for_input():
@@ -1228,7 +1242,7 @@ class Game:
                 if event.type == pg.KEYDOWN:
                     if event.key == pg.K_ESCAPE:
                         self.running = False
-                if event.type == pg.MOUSEBUTTONDOWN:
+                if event.type == pg.MOUSEBUTTONDOWN and pg.mouse.get_pressed()[0]:
                     if randomize_button.check_for_input():
                         self.sfx_randomize.play()
                         self.player.change_appearance()
@@ -1263,6 +1277,10 @@ class Game:
                         for sprite in self.time_sensitive_sprites:
                             sprite.kill()
                         self.start()
+                    if self.player.check_for_input() and self.player.breathing:
+                        self.player.twitch_time_remaining = 1.4
+                        self.sfx_squeak.play()
+                        
                 if event.type == pg.MOUSEBUTTONUP and zoom_slider.in_use:
                     self.sfx_button_click.play()
                 
