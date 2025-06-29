@@ -45,6 +45,8 @@ class Character(pg.sprite.Sprite):
         # Apperance options
         self.character_parts_low_res = parts_low_res
         self.character_parts_high_res = parts_high_res
+        self.character_surfs = []
+        self.blinking = False
         self.skin_colors = ["fair", "less_fair", "pale_brown", "medium_brown", "dark_brown", "black"]
         self.species = ["human", "cat", "dragon", "bunny"]
         self.hairstyles = ["emo", "bubble_braid", "mohawk_with_curls", "straight_short", "straight_long", "spiky", "ponytail", "teto", "miku",
@@ -61,7 +63,7 @@ class Character(pg.sprite.Sprite):
                         "none", "jacket", "coat", "floating_collar_and_cuffs", "cropped_hoodie_underbust_black", "cropped_hoodie_underbust", 
                         "trans_off_one_shoulder_crop", "white_off_one_shoulder_crop", "black_off_one_shoulder_crop",
                         "cropped_hoodie_overbust", "cropped_hoodie_overbust_split_tone", "x_sweater_black", "x_sweater_white", "lads_reduced", 
-                        "lads_full", "lads_corset",
+                        "lads_full", "lads_corset", "dress_shirt", "dress_shirt_black_tie", "dress_shirt_colored_tie"
                         ]
         self.socks_and_leggings = [
                                    "none", "black_thigh_high_socks", "knee_high_black_socks", "knee_high_black_socks_with_fishnet_leggings",
@@ -87,8 +89,8 @@ class Character(pg.sprite.Sprite):
         self.species_with_tails = ["cat", "bunny", "dragon"]
         self.tails_with_hair_color = ["cat", "bunny"]
         self.tails_with_skin_color = []
-        self.clothing_pieces_with_an_extra_layer = ["turtleneck", "maid_dress", "techwear"]
-        self.clothing_pieces_that_match_eye_color = ["cropped_hoodie_underbust", "cropped_hoodie_overbust"]
+        self.clothing_pieces_with_an_extra_layer = ["turtleneck", "maid_dress", "techwear", "dress_shirt", "dress_shirt_black_tie", "dress_shirt_colored_tie"]
+        self.clothing_pieces_that_match_eye_color = ["cropped_hoodie_underbust", "cropped_hoodie_overbust", "dress_shirt_colored_tie"]
         self.outfits_with_a_bottom_layer = ["jacket", "techwear", "floating_collar_and_cuffs"]
         self.outfits_with_deletion_masks = ["coat"]
         
@@ -168,6 +170,7 @@ class Character(pg.sprite.Sprite):
 
     def update(self, dt, zoom):
         self.tick += 1 * dt
+        # Bounce
         if self.twitch_time_remaining > 0:
             # Track time
             self.twitch_time_remaining -= .04
@@ -176,6 +179,7 @@ class Character(pg.sprite.Sprite):
             self.twitch_h = 1 + numpy.sin(6.28319 * self.twitch_time_remaining) * self.twitch_time_remaining * self.twitch_magnitude
             self.twitch_h = 1 - numpy.sin(6.28319 * self.twitch_time_remaining) * self.twitch_time_remaining * self.twitch_magnitude
             
+        # Breathe
         breathing_speed = 1
         breathing_magnitude = 10
         if self.breathing:
@@ -190,6 +194,21 @@ class Character(pg.sprite.Sprite):
             self.h += numpy.sin(breathing_speed * self.tick) * breathing_magnitude * .5
             self.image = pg.transform.smoothscale(self.appearance, (self.w, self.h))
             self.rect = self.image.get_frect(centerx = self.rect.centerx, bottom = self.zoom_rect.bottom)
+            
+        # Blink
+        blink_frequency = 1
+        blink_length = .004
+        blink_wave = round(1 + numpy.sin(blink_frequency * self.tick + 5), 3)
+        if blink_wave <= blink_length: 
+            if self.blinking == False:
+                self.appearance = self.character_surfs[1]
+                self.blinking = True
+        else: 
+            if self.blinking == True: 
+                self.appearance = self.character_surfs[0]
+                self.blinking = False
+        print(f'blink wave = {blink_wave}')                
+        print(f'blinking = {self.blinking}')                
 
     def randomize_attributes(self):
         self.skin_colors_idx = randint(0, len(self.skin_colors) - 1)
@@ -222,9 +241,9 @@ class Character(pg.sprite.Sprite):
 
         # Draws character and updates self.image
         self.breathing = True
-        surf = self.return_image(False)
+        self.character_surfs = self.return_image(False)
         #surf = pg.transform.scale_by(surf)
-        self.appearance = surf
+        self.appearance = self.character_surfs[0]
         self.twitch_time_remaining = 1
         
     def return_image(self, high_res):
@@ -297,6 +316,9 @@ class Character(pg.sprite.Sprite):
         outfit = self.outfits[self.outfits_idx]
         socks_and_leggings = self.socks_and_leggings[self.socks_and_leggings_idx]
         
+    # Store blinking face surf
+        blinking_face_surf = parts['face_blinking']
+        
     ### Pre-face surf
     # Draw hair bottom layer if applicable
         if include_hair_bottom_layer:
@@ -342,6 +364,10 @@ class Character(pg.sprite.Sprite):
         if self.upper_innerwear_idx != 0:
             # Single image
             surf.blit(parts[upper_innerwear])
+    # Draw outfit extra layer if applicable
+        if outfit in self.clothing_pieces_with_an_extra_layer:
+            # Single image
+            surf.blit(parts[f'{outfit}_extra'])
     # Draw lower outerwear (shorts/skirt/pants) if applicable
         if self.lower_outerwear_idx != 0:
             if False: # Deletion mask approach, not yet functional
@@ -389,34 +415,22 @@ class Character(pg.sprite.Sprite):
     # Draw upper innerwear extra layer if applicable
         if upper_innerwear in self.clothing_pieces_with_an_extra_layer:
             # Single image
-            surf.blit(parts[f'{upper_innerwear}_extra_layer'])
+            surf.blit(parts[f'{upper_innerwear}_extra'])
     # Draw upper outerwear if applicable
         if self.upper_outerwear_idx != 0:
             # Single image
             surf.blit(parts[upper_outerwear])
-    # Draw outfit top layer if applicable
-        if outfit in self.clothing_pieces_with_an_extra_layer:
-            if outfit in self.clothing_pieces_that_match_eye_color:
-                # Base
-                base = pg.mask.from_surface(parts[f'{outfit}_top_base'])
-                surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[f'clothing_{eye_color}']))
-                # Lineart
-                surf.blit(parts[f'{outfit}_top_lineart'])
-            else: 
-                # Single image
-                surf.blit(parts[f'{outfit}_top'])
-    # Store and clear
         pre_face_surf = surf
         del surf
-        surf = empty_surf
+        surf = pg.Surface((w, h), pg.SRCALPHA) 
     ### Face surf
     # Draw face
         # Single image
         surf.blit(parts[f'face_{eye_color}'])
     # Store face
-        face_surf = surf
+        not_blinking_face_surf = surf
         del surf
-        surf = empty_surf
+        surf = pg.Surface((w, h), pg.SRCALPHA) 
     ### Post-face surf
     # Draw glasses if hair goes over glasses
         # Single image
@@ -488,10 +502,6 @@ class Character(pg.sprite.Sprite):
         if has_horns:
             # Single image
             surf.blit(parts[f'{species}_horns_top'])
-    # Draw outfit front layer if applicable
-        if outfit in self.clothing_pieces_with_an_extra_layer:
-            # Single image
-            surf.blit(parts[f'{outfit}_top'])
     # Draw hair front if applicable
         if hairstyle in self.hairstyles_with_a_top_layer:
             # Base
@@ -503,14 +513,23 @@ class Character(pg.sprite.Sprite):
         post_face_surf = surf
         del surf
     ### Combine surfs
-        dest_surf = empty_surf
-        dest_surf.blit(pre_face_surf)
-        dest_surf.blit(face_surf)
-        dest_surf.blit(post_face_surf)
+        character_surf_not_blinking = pg.Surface((w, h), pg.SRCALPHA) 
+        character_surf_not_blinking.blit(pre_face_surf)
+        character_surf_not_blinking.blit(not_blinking_face_surf)
+        character_surf_not_blinking.blit(post_face_surf)
+        
+        character_surf_blinking = pg.Surface((w, h), pg.SRCALPHA) 
+        character_surf_blinking.blit(pre_face_surf)
+        character_surf_blinking.blit(parts['face_blinking'])
+        character_surf_blinking.blit(post_face_surf)
+        
                 
-        data = pg.image.tobytes(dest_surf, "RGBA")
-        final_surf = pg.image.frombytes(data, (w, h), "RGBA")
-        return final_surf
+        not_blinking_data = pg.image.tobytes(character_surf_not_blinking, "RGBA")
+        not_blinking_final = pg.image.frombytes(not_blinking_data, (w, h), "RGBA")
+        blinking_data = pg.image.tobytes(character_surf_blinking, "RGBA")
+        blinking_final = pg.image.frombytes(blinking_data, (w, h), "RGBA")
+        character_surfs = [not_blinking_final, blinking_final]
+        return character_surfs
     
 class SplashArt(pg.sprite.Sprite):
     def __init__(self, groups, surf, pos):
@@ -1128,13 +1147,14 @@ class Game:
         about_bg = self.background_surfs['halftone']
         about_box = pg.image.load(resource_path(join('assets', 'img', 'ui', 'about_box.png'))).convert_alpha()
         
-        x = (150 / 2) * 0
+        
+        x = 75 #* 0
         patreon_button = Button(self.about_sprites, '', self.patreon_button_surfs, (x + 580, 760), self.font, 'dark')
         twitter_button = Button(self.about_sprites, '', self.twitter_button_surfs, (x + 710, 760), self.font, 'dark')
         bluesky_button = Button(self.about_sprites, '', self.bluesky_button_surfs, (x + 840, 760), self.font, 'dark')
         cara_button = Button(self.about_sprites, '', self.cara_button_surfs, (x + 970, 760), self.font, 'dark')
         tumblr_button = Button(self.about_sprites, '', self.tumblr_button_surfs, (x + 1100, 760), self.font, 'dark')
-        nsfw_button = Button(self.about_sprites, '', self.nsfw_button_surfs, (1230, 760), self.font, 'dark')
+        #nsfw_button = Button(self.about_sprites, '', self.nsfw_button_surfs, (1230, 760), self.font, 'dark')
         
         return_button = Button(self.about_sprites, 'return to main menu', self.return_button_surfs, (settings.W / 2, 965), self.font, 'dark')
                         
@@ -1229,7 +1249,7 @@ class Game:
                             self.sfx_save_image.play()
                             path = filedialog.asksaveasfilename(defaultextension=".png")
                             if path != "":
-                                pg.image.save(self.player.return_image(True), path)
+                                pg.image.save(self.player.return_image(True)[0], path)
                         else:
                             self.sfx_invalid.play()
                     elif back_button.check_for_input():
