@@ -63,22 +63,25 @@ class Character(pg.sprite.Sprite):
                         "none", "jacket", "coat", "floating_collar_and_cuffs", "cropped_hoodie_underbust_black", "cropped_hoodie_underbust", 
                         "trans_off_one_shoulder_crop", "white_off_one_shoulder_crop", "black_off_one_shoulder_crop",
                         "cropped_hoodie_overbust", "cropped_hoodie_overbust_split_tone", "x_sweater_black", "x_sweater_white", "lads_reduced", 
-                        "lads_full", "lads_corset", "dress_shirt", "dress_shirt_black_tie", "dress_shirt_colored_tie"
+                        "lads_full", "lads_corset", "dress_shirt", "dress_shirt_black_tie", "dress_shirt_colored_tie",
                         ]
         self.socks_and_leggings = [
                                    "none", "black_thigh_high_socks", "knee_high_black_socks", "knee_high_black_socks_with_fishnet_leggings",
                                    "knee_high_black_socks_with_fishnet_thigh_highs", "knee_high_black_socks_with_pantyhose_leggings",
                                    "knee_high_black_socks_with_pantyhose_thigh_highs", "black_leggings", "fishnet_leggings", "pantyhose_leggings"
                                    ]
-        self.glasses = ["none", "sunglasses", "nerd_glasses", "bougie_glasses", "legally_distinct_kitty_glasses"]
+        self.face_accessories = ["none", "sunglasses", "nerd_glasses", "bougie_glasses", "legally_distinct_kitty_glasses", "face_mask", "face_mask_kitty", 
+                        "brow_piercing", "spider_bites", "brow_piercing_plus_spider_bites", "heart_cheeks", "broken_heart_cheeks", "happy_kitty_mask", 
+                        ]
         self.eye_colors = ["purple", "red", "blue", "green", "brown"]
+        self.tummy_piercings = ["none", "tummy_piercing", "tummy_ring_piercing"]
         
         # Exceptions
         self.hairstyles_with_a_bottom_layer = ["emo", "bubble_braid", "mohawk_with_curls", "short", "spiky", "ponytail", "straight_long", "straight_short"]
         self.hairstyles_with_no_lineart_on_bottom_layer = ["emo", "straight_long"]
         self.hairstyles_with_a_top_layer = ["teto", "spiky", "bubble_braid"]
         self.hairstyles_with_a_transparent_base = ["mohawk_with_curls"]
-        self.hairstyles_that_go_under_glasses = ["ponytail", "spiky", "straight_long"]
+        self.hairstyles_that_go_under_face_accessories = ["ponytail", "spiky", "straight_long"]
         self.hairstyles_that_show_middle_layer_of_ears = []
         self.ears_with_three_layers = ["cat", "bunny"]
         self.ears_with_one_layer = ["human", "pointy"]
@@ -89,10 +92,14 @@ class Character(pg.sprite.Sprite):
         self.species_with_tails = ["cat", "bunny", "dragon"]
         self.tails_with_hair_color = ["cat", "bunny"]
         self.tails_with_skin_color = []
-        self.clothing_pieces_with_an_extra_layer = ["turtleneck", "maid_dress", "techwear", "dress_shirt", "dress_shirt_black_tie", "dress_shirt_colored_tie"]
+        self.clothing_pieces_with_an_extra_layer = ["turtleneck", "maid_dress", "techwear", "dress_shirt", "dress_shirt_black_tie", "dress_shirt_colored_tie", 
+                                                    "kitsune_mask"]
         self.clothing_pieces_that_match_eye_color = ["cropped_hoodie_underbust", "cropped_hoodie_overbust", "dress_shirt_colored_tie"]
         self.outfits_with_a_bottom_layer = ["jacket", "techwear", "floating_collar_and_cuffs"]
         self.outfits_with_deletion_masks = ["coat"]
+        self.face_accessories_that_go_under_hair = ["face_mask", "face_mask_kitty", "brow_piercing", "shark_bites", "brow_piercing_plus_shark_bites", 
+                                                    "spider_bites", "brow_piercing_plus_spider_bites", "heart_cheeks", "broken_heart_cheeks",
+                                                    ]
         
         # Dictionary specifying colors for hair, skin, certain clothes
         self.color_dict = {
@@ -130,6 +137,9 @@ class Character(pg.sprite.Sprite):
         self.starting_w = self.low_res_w
         self.starting_h = self.low_res_h
 
+        # Initialize special attributes
+        self.sans = False
+        self.kitsune = False
         
         # Index Defaults, used when not randomized
         self.skin_colors_idx = 0
@@ -143,7 +153,8 @@ class Character(pg.sprite.Sprite):
         self.socks_and_leggings_idx = 0
         self.upper_outerwear_idx = 0
         self.eye_colors_idx = 0
-        self.glasses_idx = 0
+        self.face_accessories_idx = 0
+        self.tummy_piercings_idx = 0
         
         # Initial appearance as question mark
         surf = self.character_parts_low_res['question_mark']
@@ -193,27 +204,37 @@ class Character(pg.sprite.Sprite):
             self.w -= numpy.sin(breathing_speed * self.tick) * breathing_magnitude
             self.h += numpy.sin(breathing_speed * self.tick) * breathing_magnitude * .5
             self.image = pg.transform.smoothscale(self.appearance, (self.w, self.h))
-            self.rect = self.image.get_frect(centerx = self.rect.centerx, bottom = self.zoom_rect.bottom)    
+            self.rect = self.image.get_frect(centerx = self.rect.centerx, bottom = self.zoom_rect.bottom)
+        # Blink
+        if not self.sans:
+            blink_frequency = 1
+            blink_length = .004
+            blink_wave = round(1 + numpy.sin(blink_frequency * self.tick + 5), 3)
+            if blink_wave <= blink_length: 
+                if self.blinking == False:
+                    self.appearance = self.character_surfs[1]
+                    self.blinking = True
+            else: 
+                if self.blinking == True: 
+                    self.appearance = self.character_surfs[0]
+                    self.blinking = False
+
             
     def check_for_input(self):
         pos = (pg.mouse.get_pos())
         if pos[0] in (range(int(self.rect.left), int(self.rect.right))) and pos[1] in range(int(self.rect.top), int(self.rect.bottom)):
             return 1
 
-        # Blink
-        blink_frequency = 1
-        blink_length = .004
-        blink_wave = round(1 + numpy.sin(blink_frequency * self.tick + 5), 3)
-        if blink_wave <= blink_length: 
-            if self.blinking == False:
-                self.appearance = self.character_surfs[1]
-                self.blinking = True
-        else: 
-            if self.blinking == True: 
-                self.appearance = self.character_surfs[0]
-                self.blinking = False
 
     def randomize_attributes(self):
+        self.sans = False
+        sans_idx = randint(0,5000)
+        if sans_idx == 1: self.sans = True
+        
+        self.kitsune = False
+        kitsune_idx = randint(0, 30)
+        if kitsune_idx == 1: self.kitsune = True
+        
         self.skin_colors_idx = randint(0, len(self.skin_colors) - 1)
         self.hairstyles_idx = randint(0, len(self.hairstyles) - 1)
         self.hair_colors_idx = randint(0, len(self.hair_colors) - 1)
@@ -225,7 +246,8 @@ class Character(pg.sprite.Sprite):
         self.socks_and_leggings_idx = randint(0, len(self.socks_and_leggings) - 1)
         self.upper_outerwear_idx = randint(0, len(self.upper_outerwear) - 1)
         self.eye_colors_idx = randint(0, len(self.eye_colors) - 1)
-        self.glasses_idx = randint(0, len(self.glasses) -1)
+        self.face_accessories_idx = randint(0, len(self.face_accessories) -1)
+        self.tummy_piercings_idx = randint(0, len(self.tummy_piercings) - 1)
         # Overrides
         if self.outfits[self.outfits_idx].startswith("cropped_hoodie") or self.outfits[self.outfits_idx].startswith("lads"):
             if self.upper_outerwear[self.upper_outerwear_idx] == "cropped_tee":
@@ -246,11 +268,12 @@ class Character(pg.sprite.Sprite):
         self.breathing = True
         self.character_surfs = self.return_image(False)
         #surf = pg.transform.scale_by(surf)
-        self.appearance = self.character_surfs[0]
+        if not self.sans:
+            self.appearance = self.character_surfs[0]
+        else: self.appearance = self.character_surfs
         self.twitch_time_remaining = 1
         
     def return_image(self, high_res):
-        sans = randint(0, 500)
         # Picks appropriate image size
         if high_res: 
             w, h = self.high_res_w, self.high_res_h
@@ -259,11 +282,10 @@ class Character(pg.sprite.Sprite):
             w, h = self.low_res_w, self.low_res_h
             parts = self.character_parts_low_res
         # One in 500 chance of sans
-        if sans == 1:
+        if self.sans:
             surf = pg.Surface((w, h), pg.SRCALPHA) 
             surf.blit(parts['a_skeleton'])
-            surfs = [surf, surf]
-            return surfs
+            return surf
         # Otherwise, draw character
         else: 
         # Creates initial surface
@@ -276,7 +298,8 @@ class Character(pg.sprite.Sprite):
             skin_color = self.skin_colors_idx + 1
             eye_color = self.eye_colors[self.eye_colors_idx]
             species = self.species[self.species_idx]
-            glasses = self.glasses[self.glasses_idx]
+            face_accessory = self.face_accessories[self.face_accessories_idx]
+            tummy_piercing = self.tummy_piercings[self.tummy_piercings_idx]
             
             # Hair
             hair_color = self.hair_colors[self.hair_colors_idx]
@@ -321,12 +344,15 @@ class Character(pg.sprite.Sprite):
             else:
                 tail_color = "unique"
             
+            # Main clothing
             lower_innerwear = self.lower_innerwear[self.lower_innerwear_idx]
             lower_outerwear = self.lower_outerwear[self.lower_outerwear_idx]
             upper_innerwear = self.upper_innerwear[self.upper_innerwear_idx]
             upper_outerwear = self.upper_outerwear[self.upper_outerwear_idx]
             outfit = self.outfits[self.outfits_idx]
             socks_and_leggings = self.socks_and_leggings[self.socks_and_leggings_idx]
+            
+            # Overrides
             
         # Store blinking face surf
             blinking_face_surf = parts['face_blinking']
@@ -364,7 +390,11 @@ class Character(pg.sprite.Sprite):
             surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[f'blush_{skin_color}']))
             # Lineart
             surf.blit(parts['body_lineart'])
-        # Draw lower innerwear (panties) if applicable]
+        # Draw tummy piercing if applicable
+            if self.tummy_piercings_idx != 0:
+                # Single image
+                surf.blit(parts[tummy_piercing])
+        # Draw lower innerwear (panties) if applicable
             if self.lower_innerwear_idx != 0:
                 # Single image
                 surf.blit(parts[lower_innerwear])
@@ -444,10 +474,12 @@ class Character(pg.sprite.Sprite):
             del surf
             surf = pg.Surface((w, h), pg.SRCALPHA) 
         ### Post-face surf
-        # Draw glasses if hair goes over glasses
+        # Draw face accessory if it goes under hair
             # Single image
-            if hairstyle not in self.hairstyles_that_go_under_glasses and glasses in parts:
-                surf.blit(parts[glasses])
+            if hairstyle not in self.hairstyles_that_go_under_face_accessories and face_accessory in parts:
+                surf.blit(parts[face_accessory])
+            elif face_accessory in self.face_accessories_that_go_under_hair:
+                surf.blit(parts[face_accessory])
         # Draw ears/horns bottom layer if applicable
             if ear_layer_count == 3:
                 # Base
@@ -487,6 +519,9 @@ class Character(pg.sprite.Sprite):
                 else:
                     # Single image
                     surf.blit(parts[f'{outfit}_middle'])
+        # Draw kitsune mask bottom layer if applicable
+            if self.kitsune:
+                surf.blit(parts['kitsune_mask_bottom'])
         # Draw hair middle layer
             # Base
             base = pg.mask.from_surface(parts[f'{hairstyle}_middle_base'])
@@ -500,10 +535,11 @@ class Character(pg.sprite.Sprite):
                                                                                 127.5)))
             # Lineart
             surf.blit(parts[f'{hairstyle}_middle_lineart'])
-        # Draw glasses if hair goes under glasses
+        # Draw face accessory if it goes over hair
             # Single image
-            if hairstyle in self.hairstyles_that_go_under_glasses and glasses in parts:
-                surf.blit(parts[glasses])
+            if hairstyle in self.hairstyles_that_go_under_face_accessories and face_accessory in parts:
+                if face_accessory not in self.face_accessories_that_go_under_hair:
+                    surf.blit(parts[face_accessory])
         # Draw ears/horns top layer
             if ear_layer_count == 3:
                 # Base
@@ -521,6 +557,10 @@ class Character(pg.sprite.Sprite):
                 surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=self.color_dict[hair_color]))
                 # Lineart
                 surf.blit(parts[f'{hairstyle}_top_lineart'])
+        # Draw kitsune mask top if applicable
+            if self.kitsune:
+                # Single image
+                surf.blit(parts['kitsune_mask_top'])
         # Store post-face surf
             post_face_surf = surf
             del surf
@@ -982,11 +1022,13 @@ class Game:
         self.sfx_save_image = pg.mixer.Sound(resource_path(join('assets', 'audio', 'sfx', 'Minimalist13.ogg')))
         self.sfx_randomize = pg.mixer.Sound(resource_path(join('assets', 'audio', 'sfx', 'Minimalist9.ogg')))
         self.sfx_invalid = pg.mixer.Sound(resource_path(join('assets', 'audio', 'sfx', 'Invalid.mp3')))
+        self.sfx_sans = pg.mixer.Sound(resource_path(join('assets', 'audio', 'sfx', 'voice_sans.mp3')))
         self.sfx_squeak = pg.mixer.Sound(resource_path(join('assets', 'audio', 'sfx', 'squeak.mp3')))
         self.sfx_button_click.set_volume((self.user_settings['Master Volume'] / 100) * (self.user_settings['SFX Volume'] / 100))
         self.sfx_save_image.set_volume((self.user_settings['Master Volume'] / 100) * (self.user_settings['SFX Volume'] / 100))
         self.sfx_randomize.set_volume((self.user_settings['Master Volume'] / 100) * (self.user_settings['SFX Volume'] / 100))
         self.sfx_invalid.set_volume((self.user_settings['Master Volume'] / 100) * (self.user_settings['SFX Volume'] / 100))
+        self.sfx_sans.set_volume((self.user_settings['Master Volume'] / 100) * (self.user_settings['SFX Volume'] / 100))
         self.sfx_squeak.set_volume((self.user_settings['Master Volume'] / 100) * (self.user_settings['SFX Volume'] / 100) * .3)
         
         # Imports: Icon
@@ -1145,6 +1187,7 @@ class Game:
             self.sfx_save_image.set_volume(sfx_volume)
             self.sfx_randomize.set_volume(sfx_volume)
             self.sfx_invalid.set_volume(sfx_volume)
+            self.sfx_sans.set_volume(sfx_volume)
             self.sfx_squeak.set_volume(sfx_volume * .3)
 
             # Render
@@ -1259,13 +1302,14 @@ class Game:
                         self.sfx_button_click.play()
                         bg_img = piza_bg_button.name
                     elif save_image_button.check_for_input():
-                        if self.player.breathing:
+                        if self.player.breathing and not self.player.sans:
                             self.sfx_save_image.play()
                             path = filedialog.asksaveasfilename(defaultextension=".png")
                             if path != "":
                                 pg.image.save(self.player.return_image(True)[0], path)
                         else:
-                            self.sfx_invalid.play()
+                            if not self.player.sans: self.sfx_invalid.play()
+                            else: self.sfx_sans.play()
                     elif back_button.check_for_input():
                         self.user_settings["Zoom"] = zoom_slider.give_idx()
                         self.user_settings["Background"] = bg_img
