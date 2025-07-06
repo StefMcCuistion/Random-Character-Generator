@@ -60,7 +60,7 @@ class Character(pg.sprite.Sprite):
         self.upper_innerwear = ["none", "microkini_top", "bralette", "turtleneck", "leotard"]
         self.upper_outerwear = ["none", "cropped_tank_dark", "cropped_tank_white_with_heart", "cropped_tee"]
         self.outfits = [
-                        "none", "jacket", "coat", "floating_collar_and_cuffs", "cropped_hoodie_underbust_black", "cropped_hoodie_underbust", 
+                        "none", "jacket", "floating_collar_and_cuffs", "cropped_hoodie_underbust_black", "cropped_hoodie_underbust", 
                         "trans_off_one_shoulder_crop", "white_off_one_shoulder_crop", "black_off_one_shoulder_crop",
                         "cropped_hoodie_overbust", "cropped_hoodie_overbust_split_tone", "x_sweater_black", "x_sweater_white", "lads_reduced", 
                         "lads_full", "lads_corset", "dress_shirt", "dress_shirt_black_tie", "dress_shirt_colored_tie",
