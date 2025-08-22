@@ -52,26 +52,26 @@ class Character(pg.sprite.Sprite):
         self.hairstyles = ["emo", "bubble_braid", "mohawk_with_curls", "straight_short", "straight_long", "spiky", "ponytail", "teto", "miku",
                            "nijika"]
         self.hair_colors = ["black", "blonde", "brown", "purple", "white", "pink_1", "pink_2", "red"]
-        self.lower_innerwear = ["none", "lacy_black_panties", "microkini_bottom"]
+        self.lower_innerwear = ["none", "lacy_black_panties", "microkini_bottom", "cutout_shorts"]
         self.lower_outerwear = [
                                 "none", "jean_shorts", "low_waisted_skirt_dark_gray", "low_waisted_skirt_black", "high_waisted_skirt_dark_gray",
-                                "high_waisted_skirt_black", "ripped_jeans"
+                                "high_waisted_skirt_black", "ripped_jeans", "lads_pants"
                                 ]
-        self.upper_innerwear = ["none", "microkini_top", "bralette", "turtleneck", "leotard"]
+        self.upper_innerwear = ["none", "microkini_top", "bralette", "turtleneck", "leotard", "bodysuit", "triangle_bra"]
         self.upper_outerwear = ["none", "cropped_tank_dark", "cropped_tank_white_with_heart", "cropped_tee"]
         self.outfits = [
                         "none", "jacket", "floating_collar_and_cuffs", "cropped_hoodie_underbust_black", "cropped_hoodie_underbust", 
                         "trans_off_one_shoulder_crop", "white_off_one_shoulder_crop", "black_off_one_shoulder_crop",
                         "cropped_hoodie_overbust", "cropped_hoodie_overbust_split_tone", "x_sweater_black", "x_sweater_white", "lads_reduced", 
-                        "lads_full", "lads_corset", "dress_shirt", "dress_shirt_black_tie", "dress_shirt_colored_tie",
+                        "lads_corset", "dress_shirt", "dress_shirt_black_tie", "dress_shirt_colored_tie", "asian_hoodie"
                         ]
         self.socks_and_leggings = [
                                    "none", "black_thigh_high_socks", "knee_high_black_socks", "knee_high_black_socks_with_fishnet_leggings",
                                    "knee_high_black_socks_with_fishnet_thigh_highs", "knee_high_black_socks_with_pantyhose_leggings",
                                    "knee_high_black_socks_with_pantyhose_thigh_highs", "black_leggings", "fishnet_leggings", "pantyhose_leggings"
                                    ]
-        self.face_accessories = ["none", "sunglasses", "nerd_glasses", "bougie_glasses", "legally_distinct_kitty_glasses", "face_mask", "face_mask_kitty", 
-                        "brow_piercing", "spider_bites", "brow_piercing_plus_spider_bites", "heart_cheeks", "broken_heart_cheeks", "happy_kitty_mask", 
+        self.face_accessories = ["none", "sunglasses", "nerd_glasses", "bougie_glasses", "legally_distinct_kitty_glasses", "face_mask_kitty", 
+                        "happy_kitty_mask", 
                         ]
         self.eye_colors = ["purple", "red", "blue", "green", "brown"]
         self.tummy_piercings = ["none", "tummy_piercing", "tummy_ring_piercing"]
@@ -259,6 +259,8 @@ class Character(pg.sprite.Sprite):
             self.lower_innerwear_idx = 0
         if self.upper_innerwear[self.upper_innerwear_idx] == 'turtleneck':
             self.upper_outerwear_idx = 0
+        if self.outfits[self.outfits_idx] == 'asian_hoodie':
+            self.lower_outerwear_idx = 0
             
     def change_appearance(self):
 
@@ -352,6 +354,12 @@ class Character(pg.sprite.Sprite):
             outfit = self.outfits[self.outfits_idx]
             socks_and_leggings = self.socks_and_leggings[self.socks_and_leggings_idx]
             
+            # LaDS combo
+            lads_combo = False
+            if outfit == "lads_corset" and lower_outerwear == "lads_pants":
+                lads_combo = True
+
+            
             # Overrides
             
         # Store blinking face surf
@@ -410,6 +418,10 @@ class Character(pg.sprite.Sprite):
             if outfit in self.clothing_pieces_with_an_extra_layer:
                 # Single image
                 surf.blit(parts[f'{outfit}_extra'])
+        # Draw LaDS pants extra layer if LaDS combo
+            if lads_combo:
+                # Single image
+                surf.blit(parts[f'lads_pants_extra'])
         # Draw lower outerwear (shorts/skirt/pants) if applicable
             if self.lower_outerwear_idx != 0:
                 if False: # Deletion mask approach, not yet functional
@@ -1205,13 +1217,13 @@ class Game:
         about_box = pg.image.load(resource_path(join('assets', 'img', 'ui', 'about_box.png'))).convert_alpha()
         
         
-        x = 75 #* 0
+        x = 75 * 0
         patreon_button = Button(self.about_sprites, '', self.patreon_button_surfs, (x + 580, 760), self.font, 'dark')
         twitter_button = Button(self.about_sprites, '', self.twitter_button_surfs, (x + 710, 760), self.font, 'dark')
         bluesky_button = Button(self.about_sprites, '', self.bluesky_button_surfs, (x + 840, 760), self.font, 'dark')
         cara_button = Button(self.about_sprites, '', self.cara_button_surfs, (x + 970, 760), self.font, 'dark')
         tumblr_button = Button(self.about_sprites, '', self.tumblr_button_surfs, (x + 1100, 760), self.font, 'dark')
-        #nsfw_button = Button(self.about_sprites, '', self.nsfw_button_surfs, (1230, 760), self.font, 'dark')
+        nsfw_button = Button(self.about_sprites, '', self.nsfw_button_surfs, (1230, 760), self.font, 'dark')
         
         return_button = Button(self.about_sprites, 'return to main menu', self.return_button_surfs, (settings.W / 2, 965), self.font, 'dark')
                         
@@ -1236,8 +1248,8 @@ class Game:
                         webbrowser.open('https://cara.app/stekken/all')
                     if tumblr_button.check_for_input():
                         webbrowser.open('https://www.tumblr.com/blog/stekken')
-                    #if nsfw_button.check_for_input():
-                        #webbrowser.open('https://linktr.ee/stekkennsfw')
+                    if nsfw_button.check_for_input():
+                        webbrowser.open('https://linktr.ee/stekkennsfw')
                     if return_button.check_for_input():
                         self.sfx_button_click.play()
                         for sprite in self.about_sprites:
@@ -1322,7 +1334,7 @@ class Game:
                             sprite.kill()
                         self.start()
                     if self.player.check_for_input() and self.player.breathing:
-                        self.player.twitch_time_remaining = 1.4
+                        self.player.twitch_time_remaining = 2.5
                         self.sfx_squeak.play()
                         
                 if event.type == pg.MOUSEBUTTONUP and zoom_slider.in_use:
