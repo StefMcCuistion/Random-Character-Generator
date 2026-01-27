@@ -1,26 +1,25 @@
-import io
+# import io
 from random import randint, uniform
 import pygame as pg
 
-import datetime
+# import datetime
 
 import json
 
-from pygame import mixer
+# from pygame import mixer
 from os.path import join
 import os
 from os import walk
 import sys
 from sys import exit
 
-from PIL import Image
+# from PIL import Image
 
-import tkinter
+# import tkinter
 from tkinter import filedialog
 import ctypes
-import pywinauto
-
-import pyautogui
+# import pywinauto
+# import pyautogui
 
 import numpy
 
@@ -29,6 +28,7 @@ import numpy
 import webbrowser
 
 import settings
+
 
 def resource_path(relative_path):
     """Get absolute path to resource, workaround for PyInstaller"""
@@ -39,6 +39,7 @@ def resource_path(relative_path):
 
     return join(base_path, relative_path)
 
+
 class Character(pg.sprite.Sprite):
     def __init__(self, groups, parts_low_res, parts_high_res):
         super().__init__(groups)
@@ -47,41 +48,75 @@ class Character(pg.sprite.Sprite):
         self.character_parts_high_res = parts_high_res
         self.character_surfs = []
         self.blinking = False
-        self.skin_colors = ["fair", "less_fair", "pale_brown", "medium_brown", "dark_brown", "black"]
+        self.skin_colors = [
+                            "fair", "less_fair", "pale_brown", "medium_brown",
+                            "dark_brown", "black"
+                            ]
         self.species = ["human", "cat", "dragon", "bunny"]
-        self.hairstyles = ["emo", "bubble_braid", "mohawk_with_curls", "straight_short", "straight_long", "spiky", "ponytail", "teto", "miku",
-                           "nijika"]
-        self.hair_colors = ["black", "blonde", "brown", "purple", "white", "pink_1", "pink_2", "red"]
-        self.lower_innerwear = ["none", "lacy_black_panties", "microkini_bottom", "cutout_shorts"]
+        self.hairstyles = [
+                            "emo", "bubble_braid", "mohawk_with_curls",
+                            "straight_short", "straight_long", "spiky",
+                            "ponytail", "teto", "miku", "nijika"
+                            ]
+        self.hair_colors = [
+                            "black", "blonde", "brown", "purple", "white",
+                            "pink_1", "pink_2", "red"
+                            ]
+        self.lower_innerwear = [
+                                "none", "lacy_black_panties", "microkini_bottom",
+                                "cutout_shorts"
+                                ]
         self.lower_outerwear = [
-                                "none", "jean_shorts", "low_waisted_skirt_dark_gray", "low_waisted_skirt_black", "high_waisted_skirt_dark_gray",
+                                "none", "jean_shorts", "low_waisted_skirt_dark_gray",
+                                "low_waisted_skirt_black", "high_waisted_skirt_dark_gray",
                                 "high_waisted_skirt_black", "ripped_jeans", "lads_pants"
                                 ]
-        self.upper_innerwear = ["none", "microkini_top", "bralette", "turtleneck", "leotard", "bodysuit", "triangle_bra"]
-        self.upper_outerwear = ["none", "cropped_tank_dark", "cropped_tank_white_with_heart", "cropped_tee"]
+        self.upper_innerwear = [
+                                "none", "microkini_top", "bralette", "turtleneck",
+                                "leotard", "bodysuit", "triangle_bra"
+                                ]
+        self.upper_outerwear = [
+                                "none", "cropped_tank_dark",
+                                "cropped_tank_white_with_heart", "cropped_tee"
+                                ]
         self.outfits = [
-                        "none", "jacket", "floating_collar_and_cuffs", "cropped_hoodie_underbust_black", "cropped_hoodie_underbust", 
-                        "trans_off_one_shoulder_crop", "white_off_one_shoulder_crop", "black_off_one_shoulder_crop",
-                        "cropped_hoodie_overbust", "cropped_hoodie_overbust_split_tone", "x_sweater_black", "x_sweater_white", "lads_reduced", 
-                        "lads_corset", "dress_shirt", "dress_shirt_black_tie", "dress_shirt_colored_tie", "asian_hoodie"
+                        "none", "jacket", "floating_collar_and_cuffs",
+                        "cropped_hoodie_underbust_black", "cropped_hoodie_underbust",
+                        "trans_off_one_shoulder_crop", "white_off_one_shoulder_crop",
+                        "black_off_one_shoulder_crop", "cropped_hoodie_overbust",
+                        "cropped_hoodie_overbust_split_tone", "x_sweater_black",
+                        "x_sweater_white", "lads_reduced",  "lads_corset",
+                        "dress_shirt", "dress_shirt_black_tie",
+                        "dress_shirt_colored_tie", "asian_hoodie"
                         ]
         self.socks_and_leggings = [
-                                   "none", "black_thigh_high_socks", "knee_high_black_socks", "knee_high_black_socks_with_fishnet_leggings",
-                                   "knee_high_black_socks_with_fishnet_thigh_highs", "knee_high_black_socks_with_pantyhose_leggings",
-                                   "knee_high_black_socks_with_pantyhose_thigh_highs", "black_leggings", "fishnet_leggings", "pantyhose_leggings"
+                                   "none", "black_thigh_high_socks", "knee_high_black_socks",
+                                   "knee_high_black_socks_with_fishnet_leggings",
+                                   "knee_high_black_socks_with_fishnet_thigh_highs",
+                                   "knee_high_black_socks_with_pantyhose_leggings",
+                                   "knee_high_black_socks_with_pantyhose_thigh_highs",
+                                   "black_leggings", "fishnet_leggings", "pantyhose_leggings"
                                    ]
-        self.face_accessories = ["none", "sunglasses", "nerd_glasses", "bougie_glasses", "legally_distinct_kitty_glasses", "face_mask_kitty", 
-                        "happy_kitty_mask", 
-                        ]
+        self.face_accessories = ["none", "sunglasses", "nerd_glasses", "bougie_glasses",
+                                 "legally_distinct_kitty_glasses", "face_mask_kitty",
+                                 "happy_kitty_mask",
+                                 ]
         self.eye_colors = ["purple", "red", "blue", "green", "brown"]
         self.tummy_piercings = ["none", "tummy_piercing", "tummy_ring_piercing"]
-        
+
         # Exceptions
-        self.hairstyles_with_a_bottom_layer = ["emo", "bubble_braid", "mohawk_with_curls", "short", "spiky", "ponytail", "straight_long", "straight_short"]
+        self.hairstyles_with_a_bottom_layer = [
+                                                "emo", "bubble_braid", "mohawk_with_curls",
+                                                "short", "spiky", "ponytail",
+                                                "straight_long", "straight_short"
+                                                ]
         self.hairstyles_with_no_lineart_on_bottom_layer = ["emo", "straight_long"]
         self.hairstyles_with_a_top_layer = ["teto", "spiky", "bubble_braid"]
         self.hairstyles_with_a_transparent_base = ["mohawk_with_curls"]
-        self.hairstyles_that_go_under_face_accessories = ["ponytail", "spiky", "straight_long"]
+        self.hairstyles_that_go_under_face_accessories = [
+                                                            "ponytail", "spiky",
+                                                            "straight_long"
+                                                          ]
         self.hairstyles_that_show_middle_layer_of_ears = []
         self.ears_with_three_layers = ["cat", "bunny"]
         self.ears_with_one_layer = ["human", "pointy"]
@@ -92,43 +127,55 @@ class Character(pg.sprite.Sprite):
         self.species_with_tails = ["cat", "bunny", "dragon"]
         self.tails_with_hair_color = ["cat", "bunny"]
         self.tails_with_skin_color = []
-        self.clothing_pieces_with_an_extra_layer = ["turtleneck", "maid_dress", "techwear", "dress_shirt", "dress_shirt_black_tie", "dress_shirt_colored_tie", 
-                                                    "kitsune_mask"]
-        self.clothing_pieces_that_match_eye_color = ["cropped_hoodie_underbust", "cropped_hoodie_overbust", "dress_shirt_colored_tie"]
+        self.clothing_pieces_with_an_extra_layer = [
+                                                    "turtleneck", "maid_dress",
+                                                    "techwear", "dress_shirt",
+                                                    "dress_shirt_black_tie",
+                                                    "dress_shirt_colored_tie",
+                                                    "kitsune_mask"
+                                                    ]
+        self.clothing_pieces_that_match_eye_color = [
+                                                     "cropped_hoodie_underbust",
+                                                     "cropped_hoodie_overbust",
+                                                     "dress_shirt_colored_tie"
+                                                     ]
         self.outfits_with_a_bottom_layer = ["jacket", "techwear", "floating_collar_and_cuffs"]
         self.outfits_with_deletion_masks = ["coat"]
-        self.face_accessories_that_go_under_hair = ["face_mask", "face_mask_kitty", "brow_piercing", "shark_bites", "brow_piercing_plus_shark_bites", 
-                                                    "spider_bites", "brow_piercing_plus_spider_bites", "heart_cheeks", "broken_heart_cheeks",
+        self.face_accessories_that_go_under_hair = ["face_mask", "face_mask_kitty",
+                                                    "brow_piercing", "shark_bites",
+                                                    "brow_piercing_plus_shark_bites",
+                                                    "spider_bites", "brow_piercing_plus_spider_bites",
+                                                    "heart_cheeks", "broken_heart_cheeks",
                                                     ]
-        
+
         # Dictionary specifying colors for hair, skin, certain clothes
         self.color_dict = {
                            # Skin tones
-                           "skin_1": (248,231,222),        "blush_1": (244,221,205), 
-                           "skin_2": (232,202,186),        "blush_2": (224,186,167), 
-                           "skin_3": (215,176,155),        "blush_3": (206,161,133), 
-                           "skin_4": (200,155,123),        "blush_4": (193,143,111), 
-                           "skin_5": (150,117,92),         "blush_5": (144,106,81), 
-                           "skin_6": (129,98,74),          "blush_6": (124,91,65), 
-                           
+                           "skin_1": (248, 231, 222),        "blush_1": (244, 221, 205),
+                           "skin_2": (232, 202, 186),        "blush_2": (224, 186, 167),
+                           "skin_3": (215, 176, 155),        "blush_3": (206, 161, 133),
+                           "skin_4": (200, 155, 123),        "blush_4": (193, 143, 111),
+                           "skin_5": (150, 117, 92),         "blush_5": (144, 106, 81),
+                           "skin_6": (129, 98, 74),          "blush_6": (124, 91, 65),
+
                            # Hair
-                           "purple": (100,92,157),
-                           "blonde": (246,234,204),
-                           "brown":  (89,63,74),
-                           "black":  (54,54,79),
-                           "white":  (232,236,240),
-                           "pink_1": (255,190,253),
-                           "pink_2": (255,191,218),
-                           "red":    (137,58,66), 
-                           
+                           "purple": (100, 92, 157),
+                           "blonde": (246, 234, 204),
+                           "brown":  (89, 63, 74),
+                           "black":  (54, 54, 79),
+                           "white":  (232, 236, 240),
+                           "pink_1": (255, 190, 253),
+                           "pink_2": (255, 191, 218),
+                           "red":    (137, 58, 66),
+
                            # Clothing that matches eye color
-                           "clothing_purple": (166,142,236), 
-                           "clothing_brown":  (243,220,184), 
-                           "clothing_green":  (192,222,154), 
-                           "clothing_blue":   (110,121,161), 
-                           "clothing_red":    (229,129,163), 
+                           "clothing_purple": (166, 142, 236),
+                           "clothing_brown":  (243, 220, 184),
+                           "clothing_green":  (192, 222, 154),
+                           "clothing_blue":   (110, 121, 161),
+                           "clothing_red":    (229, 129, 163),
                            }
-        
+
         # Initial sizes
         self.low_res_w = 883
         self.low_res_h = 1257
@@ -140,7 +187,7 @@ class Character(pg.sprite.Sprite):
         # Initialize special attributes
         self.sans = False
         self.kitsune = False
-        
+
         # Index Defaults, used when not randomized
         self.skin_colors_idx = 0
         self.hairstyles_idx = 1
@@ -155,25 +202,25 @@ class Character(pg.sprite.Sprite):
         self.eye_colors_idx = 0
         self.face_accessories_idx = 0
         self.tummy_piercings_idx = 0
-        
+
         # Initial appearance as question mark
         surf = self.character_parts_low_res['question_mark']
-        surf = pg.transform.scale_by(surf, .73) # Low res
-        #surf = pg.transform.scale_by(surf, .46) # High res
+        surf = pg.transform.scale_by(surf, .73)  # Low res
+        # surf = pg.transform.scale_by(surf, .46)  # High res
         self.appearance = surf
         self.image = self.appearance
-        self.rect = self.image.get_frect(center = (1300, 550))
+        self.rect = self.image.get_frect(center=(1300, 550))
         self.initial_center_y = self.rect.centery
         self.zoom_rect = self.rect
-        
+
         # Animation
         self.tick = 1
-        self.w = self.starting_w # Low res
-        self.h = self.starting_h # Low res
-        #self.h = 2513 # High res
-        #self.w = 1766 # High res
+        self.w = self.starting_w  # Low res
+        self.h = self.starting_h  # Low res
+        # self.h = 2513 # High res
+        # self.w = 1766 # High res
         self.breathing = False
-        
+
         self.twitch_time_remaining = 0
         self.twitch_h = 1
         self.twitch_w = 1
@@ -188,53 +235,53 @@ class Character(pg.sprite.Sprite):
             self.twitch_time_remaining = round(self.twitch_time_remaining, 2)
             # Change self.twitch_h and self.twitch_w to animate
             self.twitch_h = 1 + numpy.sin(6.28319 * self.twitch_time_remaining) * self.twitch_time_remaining * self.twitch_magnitude
-            self.twitch_h = 1 - numpy.sin(6.28319 * self.twitch_time_remaining) * self.twitch_time_remaining * self.twitch_magnitude
-            
+            self.twitch_w = 1 - numpy.sin(6.28319 * self.twitch_time_remaining) * self.twitch_time_remaining * self.twitch_magnitude
+
         # Breathe
         breathing_speed = 1
         breathing_magnitude = 10
         if self.breathing:
-            img_x = self.starting_w 
-            img_y = self.starting_h 
-            self.w = img_x * self.twitch_w * (.598 + (.004 * zoom)) # Low res
-            self.h = img_y * self.twitch_h * (.598 + (.004 * zoom)) # Low res
-            #self.w = img_x * self.twitch_w * (.322 + (.0018 * zoom)) # High res
-            #elf.h = img_y * self.twitch_h * (.322 + (.0018 * zoom)) # High res
-            self.zoom_rect = pg.transform.scale(self.appearance, (self.w, self.h)).get_frect(center = self.zoom_rect.center)
+            img_x = self.starting_w
+            img_y = self.starting_h
+            self.w = img_x * self.twitch_w * (.598 + (.004 * zoom))  # Low res
+            self.h = img_y * self.twitch_h * (.598 + (.004 * zoom))  # Low res
+            # self.w = img_x * self.twitch_w * (.322 + (.0018 * zoom)) # High res
+            # self.h = img_y * self.twitch_h * (.322 + (.0018 * zoom)) # High res
+            self.zoom_rect = pg.transform.scale(self.appearance, (self.w, self.h)).get_frect(center=self.zoom_rect.center)
             self.w -= numpy.sin(breathing_speed * self.tick) * breathing_magnitude
             self.h += numpy.sin(breathing_speed * self.tick) * breathing_magnitude * .5
             self.image = pg.transform.smoothscale(self.appearance, (self.w, self.h))
-            self.rect = self.image.get_frect(centerx = self.rect.centerx, bottom = self.zoom_rect.bottom)
+            self.rect = self.image.get_frect(centerx=self.rect.centerx, bottom=self.zoom_rect.bottom)
         # Blink
         if not self.sans:
             blink_frequency = 1
             blink_length = .004
             blink_wave = round(1 + numpy.sin(blink_frequency * self.tick + 5), 3)
             if blink_wave <= blink_length: 
-                if self.blinking == False:
+                if self.blinking is False:
                     self.appearance = self.character_surfs[1]
                     self.blinking = True
-            else: 
-                if self.blinking == True: 
+            else:
+                if self.blinking is True: 
                     self.appearance = self.character_surfs[0]
                     self.blinking = False
 
-            
     def check_for_input(self):
         pos = (pg.mouse.get_pos())
         if pos[0] in (range(int(self.rect.left), int(self.rect.right))) and pos[1] in range(int(self.rect.top), int(self.rect.bottom)):
             return 1
 
-
     def randomize_attributes(self):
         self.sans = False
-        sans_idx = randint(0,5000)
-        if sans_idx == 1: self.sans = True
-        
+        sans_idx = randint(0, 5000)
+        if sans_idx == 1:
+            self.sans = True
+
         self.kitsune = False
         kitsune_idx = randint(0, 30)
-        if kitsune_idx == 1: self.kitsune = True
-        
+        if kitsune_idx == 1:
+            self.kitsune = True
+
         self.skin_colors_idx = randint(0, len(self.skin_colors) - 1)
         self.hairstyles_idx = randint(0, len(self.hairstyles) - 1)
         self.hair_colors_idx = randint(0, len(self.hair_colors) - 1)
@@ -246,7 +293,7 @@ class Character(pg.sprite.Sprite):
         self.socks_and_leggings_idx = randint(0, len(self.socks_and_leggings) - 1)
         self.upper_outerwear_idx = randint(0, len(self.upper_outerwear) - 1)
         self.eye_colors_idx = randint(0, len(self.eye_colors) - 1)
-        self.face_accessories_idx = randint(0, len(self.face_accessories) -1)
+        self.face_accessories_idx = randint(0, len(self.face_accessories) - 1)
         self.tummy_piercings_idx = randint(0, len(self.tummy_piercings) - 1)
         # Overrides
         if self.outfits[self.outfits_idx].startswith("cropped_hoodie") or self.outfits[self.outfits_idx].startswith("lads"):
@@ -261,7 +308,7 @@ class Character(pg.sprite.Sprite):
             self.upper_outerwear_idx = 0
         if self.outfits[self.outfits_idx] == 'asian_hoodie':
             self.lower_outerwear_idx = 0
-            
+
     def change_appearance(self):
 
         self.randomize_attributes()
@@ -269,40 +316,41 @@ class Character(pg.sprite.Sprite):
         # Draws character and updates self.image
         self.breathing = True
         self.character_surfs = self.return_image(False)
-        #surf = pg.transform.scale_by(surf)
+        # surf = pg.transform.scale_by(surf)
         if not self.sans:
             self.appearance = self.character_surfs[0]
-        else: self.appearance = self.character_surfs
+        else:
+            self.appearance = self.character_surfs
         self.twitch_time_remaining = 1
-        
+
     def return_image(self, high_res):
         # Picks appropriate image size
         if high_res: 
             w, h = self.high_res_w, self.high_res_h
             parts = self.character_parts_high_res
-        else: 
+        else:
             w, h = self.low_res_w, self.low_res_h
             parts = self.character_parts_low_res
         # One in 500 chance of sans
         if self.sans:
-            surf = pg.Surface((w, h), pg.SRCALPHA) 
+            surf = pg.Surface((w, h), pg.SRCALPHA)
             surf.blit(parts['a_skeleton'])
             return surf
         # Otherwise, draw character
-        else: 
-        # Creates initial surface
-            surf = pg.Surface((w, h), pg.SRCALPHA) 
-            empty_surf = surf
-            
+        else:
+            # Creates initial surface
+            surf = pg.Surface((w, h), pg.SRCALPHA)
+            # empty_surf = surf
+
         # Store attributes
-            
+
             # Misc.
             skin_color = self.skin_colors_idx + 1
             eye_color = self.eye_colors[self.eye_colors_idx]
             species = self.species[self.species_idx]
             face_accessory = self.face_accessories[self.face_accessories_idx]
             tummy_piercing = self.tummy_piercings[self.tummy_piercings_idx]
-            
+
             # Hair
             hair_color = self.hair_colors[self.hair_colors_idx]
             hairstyle = self.hairstyles[self.hairstyles_idx]
@@ -310,12 +358,12 @@ class Character(pg.sprite.Sprite):
                 include_hair_bottom_layer = True
                 if hairstyle in self.hairstyles_with_no_lineart_on_bottom_layer:
                     include_hair_bottom_layer_lineart = False
-                else: 
+                else:
                     include_hair_bottom_layer_lineart = True
-            else: 
+            else:
                 include_hair_bottom_layer = False
                 include_hair_bottom_layer_lineart = False
-            
+
             # Ears
             if species in self.species_with_human_ears:
                 ears = "human"
@@ -325,13 +373,13 @@ class Character(pg.sprite.Sprite):
                 ears = species
                 ear_color = hair_color
                 ear_layer_count = 3
-                
+
             # Horns
             if species in self.species_with_horns:
                 has_horns = True
-            else: 
+            else:
                 has_horns = False
-                
+
             # Tail
             if species in self.species_with_tails:
                 has_a_tail = True
@@ -345,7 +393,7 @@ class Character(pg.sprite.Sprite):
                 tail_color = skin_color
             else:
                 tail_color = "unique"
-            
+
             # Main clothing
             lower_innerwear = self.lower_innerwear[self.lower_innerwear_idx]
             lower_outerwear = self.lower_outerwear[self.lower_outerwear_idx]
@@ -353,18 +401,17 @@ class Character(pg.sprite.Sprite):
             upper_outerwear = self.upper_outerwear[self.upper_outerwear_idx]
             outfit = self.outfits[self.outfits_idx]
             socks_and_leggings = self.socks_and_leggings[self.socks_and_leggings_idx]
-            
+
             # LaDS combo
             lads_combo = False
             if outfit == "lads_corset" and lower_outerwear == "lads_pants":
                 lads_combo = True
 
-            
             # Overrides
-            
+
         # Store blinking face surf
-            blinking_face_surf = parts['face_blinking']
-            
+            # blinking_face_surf = parts['face_blinking']
+
         ### Pre-face surf
         # Draw hair bottom layer if applicable
             if include_hair_bottom_layer:
@@ -421,45 +468,12 @@ class Character(pg.sprite.Sprite):
         # Draw LaDS pants extra layer if LaDS combo
             if lads_combo:
                 # Single image
-                surf.blit(parts[f'lads_pants_extra'])
+                surf.blit(parts['lads_pants_extra'])
         # Draw lower outerwear (shorts/skirt/pants) if applicable
             if self.lower_outerwear_idx != 0:
-                if False: # Deletion mask approach, not yet functional
-                    # Store image
-                    part_surf = parts[lower_outerwear]
-                    part_surf_copy = part_surf
-                    # Deletion mask if applicable
-                    # This is a MESS right now. And not fully functional. It's on the TODO
-                    if outfit in self.outfits_with_deletion_masks:
-                        part_mask = pg.mask.from_surface(part_surf)
-                        deletion_mask = pg.mask.from_surface(parts[f'{outfit}_deletion_mask'])
-                        overlap_mask = deletion_mask.overlap_mask(part_mask, (0, 0))
-                        overlap_mask.to_surface(part_surf, unsetcolor=(0,0,0,0), setcolor=(255,0,0,255))
-                        #parts[lower_outerwear] = pg.transform.smoothscale_by(parts[lower_outerwear], 1.05)
-                        #outline = overlap_mask.outline(1)
-                        #print(f'outline={outline}')
-                        #pg.draw.lines(parts[lower_outerwear], (255,0,0,255), True, outline, 1)
-                        untouchable_surf = pg.image.load(resource_path(join('assets', 'img', 'character_parts', f'{lower_outerwear}.png'))).convert_alpha()
-                        print(f'lower_outerwear ={lower_outerwear}')
-                        untouchable_surf_low_res = pg.transform.smoothscale_by(untouchable_surf, .5)
-                        untouchable_surf_low_res.blit(parts[lower_outerwear])
-                        buffer = pg.PixelArray(untouchable_surf_low_res)
-                        buffer = buffer.replace((255,0,0,255), (0,0,0,0))
-                        del buffer
-                        restored_surf = pg.image.load(resource_path(join('assets', 'img', 'character_parts', f'{lower_outerwear}.png'))).convert_alpha()
-                        self.character_parts_high_res[lower_outerwear] = restored_surf
-                        self.character_parts_low_res[lower_outerwear] = pg.transform.smoothscale_by(restored_surf, .5)
-                        #path = filedialog.asksaveasfilename(defaultextension=".png")
-                        #if path != "":
-                        #    pg.image.save(untouchable_surf, path)
-                        surf.blit(untouchable_surf_low_res)
-                        # Draw image
-                        #surf.blit(part_surf)
+                # Single image
+                surf.blit(parts[lower_outerwear])
 
-                else: # Normal approach, allows clipping on certain outfits with certail lower outerwear
-                    # Single image
-                    surf.blit(parts[lower_outerwear])
-                    
         # Draw arm
             # Base
             base = pg.mask.from_surface(parts['arm_base'])
@@ -541,10 +555,11 @@ class Character(pg.sprite.Sprite):
             # Transparent base if applicable
             if hairstyle in self.hairstyles_with_a_transparent_base:
                 base = pg.mask.from_surface(parts[f'{hairstyle}_middle_transparent_base'])
-                surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=((self.color_dict[hair_color][0]),
-                                                                                (self.color_dict[hair_color][1]),
-                                                                                (self.color_dict[hair_color][2]),
-                                                                                127.5)))
+                surf.blit(base.to_surface(unsetcolor=(0, 0, 0, 0), setcolor=(
+                    self.color_dict[hair_color][0],
+                    self.color_dict[hair_color][1],
+                    self.color_dict[hair_color][2],
+                    127.5)))
             # Lineart
             surf.blit(parts[f'{hairstyle}_middle_lineart'])
         # Draw face accessory if it goes over hair
@@ -577,48 +592,49 @@ class Character(pg.sprite.Sprite):
             post_face_surf = surf
             del surf
         ### Combine surfs
-            character_surf_not_blinking = pg.Surface((w, h), pg.SRCALPHA) 
+            character_surf_not_blinking = pg.Surface((w, h), pg.SRCALPHA)
             character_surf_not_blinking.blit(pre_face_surf)
             character_surf_not_blinking.blit(not_blinking_face_surf)
             character_surf_not_blinking.blit(post_face_surf)
-            
-            character_surf_blinking = pg.Surface((w, h), pg.SRCALPHA) 
+
+            character_surf_blinking = pg.Surface((w, h), pg.SRCALPHA)
             character_surf_blinking.blit(pre_face_surf)
             character_surf_blinking.blit(parts['face_blinking'])
             character_surf_blinking.blit(post_face_surf)
-            
-                    
+
             not_blinking_data = pg.image.tobytes(character_surf_not_blinking, "RGBA")
             not_blinking_final = pg.image.frombytes(not_blinking_data, (w, h), "RGBA")
             blinking_data = pg.image.tobytes(character_surf_blinking, "RGBA")
             blinking_final = pg.image.frombytes(blinking_data, (w, h), "RGBA")
             character_surfs = [not_blinking_final, blinking_final]
             return character_surfs
-    
+
+
 class SplashArt(pg.sprite.Sprite):
     def __init__(self, groups, surf, pos):
         super().__init__(groups)
         self.og_img = surf
         self.image = self.og_img
         self.pos = pos
-        self.rect = self.image.get_frect(center = pos)
+        self.rect = self.image.get_frect(center=pos)
         self.size = 1
         self.tick = 1
-        
+
     def update(self, dt):
         self.tick += 1 * dt
         speed = .8
         magnitude = .05
         self.size = 1 + (magnitude * numpy.sin(self.tick * speed))
         self.image = pg.transform.smoothscale_by(self.og_img, self.size)
-        self.rect = self.image.get_frect(center = self.rect.center)
+        self.rect = self.image.get_frect(center=self.rect.center)
+
 
 class Heart(pg.sprite.Sprite):
     def __init__(self, surf, pos, groups):
         super().__init__(groups)
         self.og_surf = surf
         self.image = self.og_surf
-        self.rect = self.image.get_frect(center = pos)
+        self.rect = self.image.get_frect(center=pos)
         self.creation_time = pg.time.get_ticks()
         self.dir = pg.math.Vector2(uniform(-0.5, 0.5), 1)
         self.speed = randint(400, 500)
@@ -627,14 +643,15 @@ class Heart(pg.sprite.Sprite):
 
     def update(self, dt):
         self.rect.center += self.dir * self.speed * dt
-        current_time = pg.time.get_ticks()
+        # current_time = pg.time.get_ticks()
         if self.rect.top > settings.H or self.rect.left > settings.W or self.rect.right < 0:
             self.kill()
 
         # Rotation
         self.rotation += self.roto_speed * dt
         self.image = pg.transform.rotozoom(self.og_surf, self.rotation, 1)
-        self.rect = self.image.get_frect(center = self.rect.center)
+        self.rect = self.image.get_frect(center=self.rect.center)
+
 
 class Button(pg.sprite.Sprite):
     def __init__(self, groups, name, surfs, pos, font, txt_color):
@@ -643,7 +660,7 @@ class Button(pg.sprite.Sprite):
         self.surfs = surfs
         self.image = self.surfs['unselected']
         self.pos = pos
-        self.rect = self.image.get_frect(center = self.pos)
+        self.rect = self.image.get_frect(center=self.pos)
         self.font = font
         if txt_color == 'light':
             self.selected_color = '#ffe8f9'
@@ -655,10 +672,11 @@ class Button(pg.sprite.Sprite):
         self.name = name
         self.text = self.font.render(self.name, True, self.font_color)
         if self.name != 'randomize': 
-            self.text_rect = self.text.get_frect(center = (self.rect.center[0], self.rect.center[1] + 22))
-        else: 
-            self.text_rect = self.text.get_frect(center = (self.rect.center[0] + 95, self.rect.center[1] + 20))
-
+            self.text_rect = self.text.get_frect(
+                center=(self.rect.center[0], self.rect.center[1] + 22))
+        else:
+            self.text_rect = self.text.get_frect(
+                center=(self.rect.center[0] + 95, self.rect.center[1] + 20))
 
     def update(self, display):
         if self.check_for_input():
@@ -676,16 +694,15 @@ class Button(pg.sprite.Sprite):
                 self.image = self.surfs['selected']
         else:
             self.image = self.surfs['unselected']
-        self.rect = self.image.get_frect(center = self.pos)
+        self.rect = self.image.get_frect(center=self.pos)
         display.blit(self.text, self.text_rect)
-
-
 
     def check_for_input(self):
         pos = (pg.mouse.get_pos())
         if pos[0] in (range(int(self.rect.left), int(self.rect.right))) and pos[1] in range(int(self.rect.top), int(self.rect.bottom)):
             return 1
-        
+
+
 class BackgroundsButton(pg.sprite.Sprite):
     def __init__(self, groups, name, selected, surfs, pos):
         super().__init__(groups)
@@ -694,27 +711,27 @@ class BackgroundsButton(pg.sprite.Sprite):
         self.surfs = surfs
         self.image = self.surfs[f'{self.name}_{self.selected}']
         self.pos = pos
-        self.rect = self.image.get_frect(center = self.pos)
-
+        self.rect = self.image.get_frect(center=self.pos)
 
     def update(self, display):
         if self.check_for_input():
             self.selected = 'selected'
         self.image = self.surfs[f'{self.name}_{self.selected}']
-        self.rect = self.image.get_frect(center = self.pos)
-        
+        self.rect = self.image.get_frect(center=self.pos)
+
     def change_appearance(self, bg):
         if self.name == bg:
             self.selected = 'selected'
         else:
             self.selected = 'unselected'
         self.image = self.surfs[f'{self.name}_{self.selected}']
-        self.rect = self.image.get_frect(center = self.pos)
+        self.rect = self.image.get_frect(center=self.pos)
 
     def check_for_input(self):
         pos = (pg.mouse.get_pos())
         if pos[0] in (range(int(self.rect.left), int(self.rect.right))) and pos[1] in range(int(self.rect.top), int(self.rect.bottom)) and pg.mouse.get_just_pressed()[0]:
             return 1
+
 
 class Slider(pg.sprite.Sprite):
     def __init__(self, groups, surfs, pos, user_settings, name, axis):
@@ -725,7 +742,7 @@ class Slider(pg.sprite.Sprite):
         self.selected = False
         self.in_use = False
         self.image = self.surfs['unselected']
-        self.rect = self.image.get_frect(center = self.pos)
+        self.rect = self.image.get_frect(center=self.pos)
         self.axis = axis
         self.user_settings = user_settings
         if self.axis == 'x':
@@ -739,8 +756,7 @@ class Slider(pg.sprite.Sprite):
             self.idx = self.user_settings["Zoom"]
             self.rect.centery -= self.idx * self.length
         self.name = name
-        
-        
+
     def update(self, display):
         if not self.in_use:
             if self.check_for_input():
@@ -754,10 +770,10 @@ class Slider(pg.sprite.Sprite):
                     self.image = self.surfs['selected']
             else:
                 self.image = self.surfs['unselected']
-        else: 
+        else:
             if not pg.mouse.get_pressed()[0]:
                 self.in_use = False
-            else: 
+            else:
                 if self.axis == 'x':
                     mouse_x = pg.mouse.get_pos()[0]
                     if mouse_x > self.bounds[0] and mouse_x < self.bounds[1]:
@@ -778,7 +794,7 @@ class Slider(pg.sprite.Sprite):
                     idx_candidate = round((self.bounds[1] - self.rect.centery) / self.length)
                     if abs(idx_candidate - self.idx) < 70:
                         self.idx = round((self.bounds[1] - self.rect.centery) / self.length)
-            
+
     def check_for_input(self):
         pos = (pg.mouse.get_pos())
         if pos[0] in (range(int(self.rect.left), int(self.rect.right))) and pos[1] in range(int(self.rect.top), int(self.rect.bottom)):
@@ -786,7 +802,8 @@ class Slider(pg.sprite.Sprite):
 
     def give_idx(self):
         return self.idx
-    
+
+
 class Checkbox(pg.sprite.Sprite):
     def __init__(self, groups, surfs, pos, user_settings, name):
         super().__init__(groups)
@@ -796,7 +813,7 @@ class Checkbox(pg.sprite.Sprite):
         self.surfs = surfs
         self.pos = pos
         self.image = self.surfs['unselected']
-        self.rect = self.image.get_frect(center = self.pos)
+        self.rect = self.image.get_frect(center=self.pos)
         
     def update(self, display):
         if not self.selected: 
@@ -816,15 +833,16 @@ class Checkbox(pg.sprite.Sprite):
                     self.image = self.surfs['selected_hover']
             else: 
                 self.image = self.surfs['selected']
-        
+
     def check_for_input(self):
         pos = (pg.mouse.get_pos())
         if pos[0] in (range(int(self.rect.left), int(self.rect.right))) and pos[1] in range(int(self.rect.top), int(self.rect.bottom)):
             return 1
-        
+
     def give_state(self):
         return self.selected
-    
+
+
 class StaticUI(pg.sprite.Sprite):
     def __init__(self, groups, surf, pos):
         super().__init__(groups)
@@ -832,11 +850,12 @@ class StaticUI(pg.sprite.Sprite):
         self.pos = pos
         self.rect = self.image.get_frect(center=self.pos)
 
+
 class Background(pg.sprite.Sprite):
     def __init__(self, groups, surfs, user_settings):
         super().__init__(groups)
         self.user_settings = user_settings
-        self.center_offset = .035 # Use this to make the center of the zoom effect appear to be the center of the player
+        self.center_offset = .035  # Use this to make the center of the zoom effect appear to be the center of the player
         self.zoom_idx = self.user_settings["Zoom"]
         self.surfs = surfs
         self.surf = self.surfs['halftone']
@@ -844,24 +863,22 @@ class Background(pg.sprite.Sprite):
         self.base_size = 1.3
         self.size = self.base_size + ((self.zoom_idx / 100) / self.zoom_magnitude)
         self.image = pg.transform.smoothscale_by(self.surf, self.size)
-        self.rect = self.image.get_frect(center = (settings.W / 2 - (self.zoom_idx * self.center_offset), settings.H / 2))
-
+        self.rect = self.image.get_frect(center=(settings.W / 2 - (self.zoom_idx * self.center_offset), settings.H / 2))
 
     def update(self, dt):
-        x = 1
-        
+        return
+
     def zoom(self, zoom_idx, bg_img):
         self.zoom_idx = zoom_idx
         self.size = self.base_size + ((self.zoom_idx / 100) / self.zoom_magnitude)
         self.image = pg.transform.scale_by(self.surf, self.size)
-        self.rect = self.image.get_frect(center = (settings.W / 2 - (self.zoom_idx * self.center_offset), settings.H / 2))
-                
+        self.rect = self.image.get_frect(center=(settings.W / 2 - (self.zoom_idx * self.center_offset), settings.H / 2))
+
     def change_appearance(self, bg_img):
         self.surf = self.surfs[bg_img]
         self.image = pg.transform.scale_by(self.surf, self.size)
-        self.rect = self.image.get_frect(center = self.rect.center)
-        
-    
+        self.rect = self.image.get_frect(center=self.rect.center)
+
 
 class Game:
 
@@ -871,7 +888,7 @@ class Game:
         pg.init()
         pg.font.init()
         pg.mixer.init()
-        
+
         self.user_settings = {
                               "Fullscreen": True,
                               "Master Volume": 100,
@@ -880,19 +897,18 @@ class Game:
                               "Zoom": 85,
                               "Background": "halftone"
         }
-        
+
         try:
             with open(resource_path(join('user settings', 'user_settings.csv'))) as settings_file:
                 self.user_settings = json.load(settings_file)
                 print(self.user_settings)
-        except: 
+        except:
             print('could not load user settings')
-            
-        #current_dir = os.path.dirname(os.path.abspath(__file__))
-        #asset_location = os.path.join(current_dir, "assets")
-        
+
+        # current_dir = os.path.dirname(os.path.abspath(__file__))
+        # asset_location = os.path.join(current_dir, "assets")
+
         ctypes.windll.user32.SetProcessDPIAware()  # keeps Windows GUI scale settings from messing with resolution
-        monitor_size = pg.display.list_modes()[0]
         self.fullscreen = self.user_settings['Fullscreen']
         if self.fullscreen:
             self.display = pg.display.set_mode((settings.W, settings.H), pg.SCALED | pg.FULLSCREEN)
@@ -908,11 +924,9 @@ class Game:
         self.clock = pg.time.Clock()
         self.running = True
 
-        
-
         # Imports: Cursor
         cursor_surf = pg.image.load(resource_path(join('assets', 'img', 'ui', 'mouse.png'))).convert_alpha()
-        cursor = pg.cursors.Cursor((0,0), cursor_surf)
+        cursor = pg.cursors.Cursor((0, 0), cursor_surf)
         pg.mouse.set_cursor(cursor)
 
         # Imports: Character
@@ -926,7 +940,7 @@ class Game:
                     surf_low_res = pg.transform.smoothscale_by(surf_high_res, .5)
                     self.character_parts_high_res[file_name.split('.')[0]] = surf_high_res
                     self.character_parts_low_res[file_name.split('.')[0]] = surf_low_res
-                    
+
         # Imports: Backgrounds
         self.background_surfs = {
                                 'halftone': pg.image.load(resource_path(join('assets', 'img', 'backgrounds', 'halftone.png'))).convert_alpha(),
@@ -940,101 +954,101 @@ class Game:
                              'selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'button_selected.png'))).convert_alpha(),
                              'unselected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'button_unselected.png'))).convert_alpha()
         }
-        
+
         self.return_button_surfs = {
                                     'selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'return_button_selected.png'))).convert_alpha(),
                                     'unselected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'return_button_unselected.png'))).convert_alpha()                                    
         }
-        
+
         self.slider_surfs = {
                              'unselected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'slider_knob_unselected.png'))).convert_alpha(),
                              'selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'slider_knob_selected.png'))).convert_alpha()
         }
-        
+
         self.zoom_slider_surfs = {
                              'unselected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'zoom_slider_knob_unselected.png'))).convert_alpha(),
                              'selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'slider_knob_selected.png'))).convert_alpha()
         }
-        
+
         self.checkbox_surfs = {
                                'unselected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'checkbox_unchecked.png'))).convert_alpha(),
                                'unselected_hover': pg.image.load(resource_path(join('assets', 'img', 'ui', 'checkbox_unchecked_hover.png'))).convert_alpha(),
                                'selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'checkbox_checked.png'))).convert_alpha(),
                                'selected_hover': pg.image.load(resource_path(join('assets', 'img', 'ui', 'checkbox_checked_hover.png'))).convert_alpha()
         }
-        
+
         self.randomize_button_surfs = {
                                        'unselected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'randomize_unselected.png'))).convert_alpha(),
                                        'selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'randomize_selected.png'))).convert_alpha(),
                                        'pressed': pg.image.load(resource_path(join('assets', 'img', 'ui', 'randomize_pressed.png'))).convert_alpha()
         }
-        
+
         self.save_image_button_surfs = {
                                         'unselected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'save_image_unselected.png'))).convert_alpha(), 
                                         'selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'save_image_selected.png'))).convert_alpha(),
                                         'pressed': pg.image.load(resource_path(join('assets', 'img', 'ui', 'save_image_pressed.png'))).convert_alpha()
         }
-        
+
         self.back_button_surfs = {
                                   'unselected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'back_button_unselected.png'))).convert_alpha(),
                                   'selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'back_button_selected.png'))).convert_alpha()
         }
-        
+
         self.background_button_surfs = {
                                         'halftone_unselected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'bg_halftone_button_unselected.png'))).convert_alpha(),
                                         'halftone_selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'bg_halftone_button_selected.png'))).convert_alpha(),
-                                        'outdoors_unselected':pg.image.load(resource_path(join('assets', 'img', 'ui', 'bg_outdoors_button_unselected.png'))).convert_alpha(),
-                                        'outdoors_selected':pg.image.load(resource_path(join('assets', 'img', 'ui', 'bg_outdoors_button_selected.png'))).convert_alpha(),
-                                        'hotel_unselected':pg.image.load(resource_path(join('assets', 'img', 'ui', 'bg_hotel_button_unselected.png'))).convert_alpha(),
-                                        'hotel_selected':pg.image.load(resource_path(join('assets', 'img', 'ui', 'bg_hotel_button_selected.png'))).convert_alpha(),
-                                        'piza_unselected':pg.image.load(resource_path(join('assets', 'img', 'ui', 'bg_piza_button_unselected.png'))).convert_alpha(),
-                                        'piza_selected':pg.image.load(resource_path(join('assets', 'img', 'ui', 'bg_piza_button_selected.png'))).convert_alpha()
+                                        'outdoors_unselected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'bg_outdoors_button_unselected.png'))).convert_alpha(),
+                                        'outdoors_selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'bg_outdoors_button_selected.png'))).convert_alpha(),
+                                        'hotel_unselected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'bg_hotel_button_unselected.png'))).convert_alpha(),
+                                        'hotel_selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'bg_hotel_button_selected.png'))).convert_alpha(),
+                                        'piza_unselected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'bg_piza_button_unselected.png'))).convert_alpha(),
+                                        'piza_selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'bg_piza_button_selected.png'))).convert_alpha()
         }
-        
+
         self.patreon_button_surfs = {
                                      'unselected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'socials_button_patreon_unselected.png'))).convert_alpha(),
                                      'selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'socials_button_patreon_selected.png'))).convert_alpha(),
         }
-        
+
         self.twitter_button_surfs = {
                                      'unselected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'socials_button_twitter_unselected.png'))).convert_alpha(),
                                      'selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'socials_button_twitter_selected.png'))).convert_alpha(),
         }
-        
+
         self.bluesky_button_surfs = {
                                      'unselected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'socials_button_bluesky_unselected.png'))).convert_alpha(),
                                      'selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'socials_button_bluesky_selected.png'))).convert_alpha(),
         }
-        
+
         self.cara_button_surfs = {
                                      'unselected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'socials_button_cara_unselected.png'))).convert_alpha(),
                                      'selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'socials_button_cara_selected.png'))).convert_alpha(),
         }
-        
+
         self.tumblr_button_surfs = {
                                      'unselected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'socials_button_tumblr_unselected.png'))).convert_alpha(),
                                      'selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'socials_button_tumblr_selected.png'))).convert_alpha(),
         }
-        
+
         self.nsfw_button_surfs = {
                                      'unselected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'socials_button_18_unselected.png'))).convert_alpha(),
                                      'selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'socials_button_18_selected.png'))).convert_alpha(),
         }
-        
+
         self.linktree_button_surfs = {
                                      'unselected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'socials_button_linktree_unselected.png'))).convert_alpha(),
                                      'selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'socials_button_linktree_selected.png'))).convert_alpha(),
         }
-        
+
         self.backgrounds_label_surf = pg.image.load(resource_path(join('assets', 'img', 'ui', 'play_screen_unresponsive_ui.png'))).convert_alpha()
-        
+
         # Imports: Background Hearts
         self.heart_surf = pg.image.load(resource_path(join('assets', 'img', 'ui', 'heart.png'))).convert_alpha()
-        
+
         # Imports: Audio
-        
+
         pg.mixer.music.load(resource_path(join('assets', 'audio', 'synthlofibeats-onetent.mp3')))
-        
+
         self.sfx_button_click = pg.mixer.Sound(resource_path(join('assets', 'audio', 'sfx', 'Minimalist3.ogg')))
         self.sfx_save_image = pg.mixer.Sound(resource_path(join('assets', 'audio', 'sfx', 'Minimalist13.ogg')))
         self.sfx_randomize = pg.mixer.Sound(resource_path(join('assets', 'audio', 'sfx', 'Minimalist9.ogg')))
@@ -1047,9 +1061,9 @@ class Game:
         self.sfx_invalid.set_volume((self.user_settings['Master Volume'] / 100) * (self.user_settings['SFX Volume'] / 100))
         self.sfx_sans.set_volume((self.user_settings['Master Volume'] / 100) * (self.user_settings['SFX Volume'] / 100))
         self.sfx_squeak.set_volume((self.user_settings['Master Volume'] / 100) * (self.user_settings['SFX Volume'] / 100) * .3)
-        
+
         # Imports: Icon
-        
+
         icon = pg.image.load(resource_path(join('assets', 'img', 'ui', 'icon.png'))).convert_alpha()
 
         # Sprite groups
@@ -1059,23 +1073,21 @@ class Game:
         self.about_sprites = pg.sprite.Group()
         self.options_sprites = pg.sprite.Group()
         self.splash_art_group = pg.sprite.Group()
-        
+
         # Play music
-        
+
         music_volume = (self.user_settings['Master Volume'] / 100) * (self.user_settings['Music Volume'] / 100)
         pg.mixer.music.set_volume(music_volume)
-        pg.mixer.music.play(loops = -1)
-        
+        pg.mixer.music.play(loops=-1)
+
         pg.display.set_icon(icon)
-        
-                
 
     def start(self):
 
         # Sprites
         splash_art_surf = pg.image.load(resource_path(join('assets', 'img', 'ui', 'splash_art_placeholder.png'))).convert_alpha()
         self.splash_art = SplashArt(self.splash_art_group, splash_art_surf, (600, 500))
-        
+
         start_button = Button(self.start_sprites, 'start', self.button_surfs, (1495, 290), self.font, 'light')
         options_button = Button(self.start_sprites, 'options', self.button_surfs, (1495, 475), self.font, 'light')
         about_button = Button(self.start_sprites, 'about', self.button_surfs, (1495, 660), self.font, 'light')
@@ -1086,7 +1098,7 @@ class Game:
         # Custom heart event
         heart_event = pg.event.custom_type()
         pg.time.set_timer(heart_event, 1000)
-        
+
         for i in range(0, 2):
             x, y = randint(265, settings.W - 265), 0
             Heart(self.heart_surf, (x, y), self.time_sensitive_sprites)
@@ -1150,17 +1162,17 @@ class Game:
         exit()
 
     def options(self):
-                
+
         # Sprites
         options_bg = pg.image.load(resource_path(join('assets', 'img', 'ui', 'options_background.png'))).convert_alpha()
-        
+
         return_button = Button(self.options_sprites, 'return to main menu', self.return_button_surfs, (settings.W / 2, 965), self.font, 'dark')
-        
+
         fullscreen_checkbox = Checkbox(self.options_sprites, self.checkbox_surfs, (1480, 260), self.user_settings, "Fullscreen")
         master_volume_slider = Slider(self.options_sprites, self.slider_surfs, (1750, 430), self.user_settings, "Master Volume", "x")
         music_volume_slider = Slider(self.options_sprites, self.slider_surfs, (1750, 610), self.user_settings, "Music Volume", "x")
         sfx_volume_slider = Slider(self.options_sprites, self.slider_surfs, (1750, 790), self.user_settings, "SFX Volume", "x")
-                
+
         # Loop
         while self.running:
             self.dt = self.clock.tick() / 1000
@@ -1190,7 +1202,6 @@ class Game:
                         else:
                             self.display = pg.display.set_mode((settings.W, settings.H))
 
-            
             # Update User Settings
             self.user_settings['Fullscreen'] = fullscreen_checkbox.give_state()
             self.user_settings['Master Volume'] = master_volume_slider.give_idx()
@@ -1216,23 +1227,15 @@ class Game:
         exit()
 
     def about(self):
-        
+
         # Sprites
         about_bg = self.background_surfs['halftone']
         about_box = pg.image.load(resource_path(join('assets', 'img', 'ui', 'about_box.png'))).convert_alpha()
-        
-        
-        x = 75 * 0
-        #patreon_button = Button(self.about_sprites, '', self.patreon_button_surfs, (x + 580, 760), self.font, 'dark')
-        #twitter_button = Button(self.about_sprites, '', self.twitter_button_surfs, (x + 710, 760), self.font, 'dark')
-        #bluesky_button = Button(self.about_sprites, '', self.bluesky_button_surfs, (x + 840, 760), self.font, 'dark')
-        #cara_button = Button(self.about_sprites, '', self.cara_button_surfs, (x + 970, 760), self.font, 'dark')
-        #tumblr_button = Button(self.about_sprites, '', self.tumblr_button_surfs, (x + 1100, 760), self.font, 'dark')
-        #nsfw_button = Button(self.about_sprites, '', self.nsfw_button_surfs, (1230, 760), self.font, 'dark')
+
         linktree_button = Button(self.about_sprites, '', self.linktree_button_surfs, (960, 760), self.font, 'dark')
-        
+
         return_button = Button(self.about_sprites, 'return to main menu', self.return_button_surfs, (settings.W / 2, 965), self.font, 'dark')
-                        
+
         # Loop
         while self.running:
             self.dt = self.clock.tick() / 1000
@@ -1251,7 +1254,7 @@ class Game:
                         for sprite in self.about_sprites:
                             sprite.kill()
                         self.start()
-            
+
             # Render
             self.display.blit(about_bg)
             self.display.blit(about_box)
@@ -1261,24 +1264,23 @@ class Game:
         pg.quit()
 
     def play(self):
-        
+
         bg_img = self.user_settings["Background"]
 
         # Sprites
         background = Background(self.play_sprites, self.background_surfs, self.user_settings)
-        
+
         self.player = Character(self.time_sensitive_sprites, self.character_parts_low_res, self.character_parts_high_res)
-                
-        static_ui = StaticUI(self.play_sprites, self.backgrounds_label_surf, (settings.W / 2, settings.H / 2))
+
         halftone_bg_button = BackgroundsButton(self.play_sprites, 'halftone', 'selected', self.background_button_surfs, (450, 675))
         outdoors_bg_button = BackgroundsButton(self.play_sprites, 'outdoors', 'unselected', self.background_button_surfs, (550, 675))
         hotel_bg_button = BackgroundsButton(self.play_sprites, 'hotel', 'unselected', self.background_button_surfs, (650, 675))
         piza_bg_button = BackgroundsButton(self.play_sprites, 'piza', 'unselected', self.background_button_surfs, (750, 675))
-        
+
         randomize_button = Button(self.play_sprites, 'randomize', self.randomize_button_surfs, (470, 260), self.playscreen_button_font, 'light')
         save_image_button = Button(self.play_sprites, 'save image', self.save_image_button_surfs, (495, 465), self.playscreen_button_font, 'light')
         back_button = Button(self.play_sprites, 'main menu', self.back_button_surfs, (450, 890), self.playscreen_button_font, 'light')
-        
+
         zoom_slider = Slider(self.play_sprites, self.zoom_slider_surfs, (1810, 725), self.user_settings, 'zoom', 'y')
 
         # Loop
@@ -1316,8 +1318,10 @@ class Game:
                             if path != "":
                                 pg.image.save(self.player.return_image(True)[0], path)
                         else:
-                            if not self.player.sans: self.sfx_invalid.play()
-                            else: self.sfx_sans.play()
+                            if not self.player.sans:
+                                self.sfx_invalid.play()
+                            else:
+                                self.sfx_sans.play()
                     elif back_button.check_for_input():
                         self.user_settings["Zoom"] = zoom_slider.give_idx()
                         self.user_settings["Background"] = bg_img
@@ -1332,22 +1336,22 @@ class Game:
                     if self.player.check_for_input() and self.player.breathing:
                         self.player.twitch_time_remaining = 2.5
                         self.sfx_squeak.play()
-                        
+
                 if event.type == pg.MOUSEBUTTONUP and zoom_slider.in_use:
                     self.sfx_button_click.play()
-                
+
             if zoom_slider.in_use:
                 background.zoom(zoom_idx, bg_img)
-            
+
             # Render
             halftone_bg_button.change_appearance(bg_img)
             outdoors_bg_button.change_appearance(bg_img)
             hotel_bg_button.change_appearance(bg_img)
             piza_bg_button.change_appearance(bg_img)
-            
-            #self.display.blit(self.background_surfs[bg_img])
+
+            # self.display.blit(self.background_surfs[bg_img])
             background.change_appearance(bg_img)
-            
+
             self.play_sprites.draw(self.display)
             self.play_sprites.update(self.display)
             self.time_sensitive_sprites.draw(self.display)
