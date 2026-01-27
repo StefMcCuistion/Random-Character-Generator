@@ -1021,6 +1021,11 @@ class Game:
                                      'selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'socials_button_18_selected.png'))).convert_alpha(),
         }
         
+        self.linktree_button_surfs = {
+                                     'unselected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'socials_button_linktree_unselected.png'))).convert_alpha(),
+                                     'selected': pg.image.load(resource_path(join('assets', 'img', 'ui', 'socials_button_linktree_selected.png'))).convert_alpha(),
+        }
+        
         self.backgrounds_label_surf = pg.image.load(resource_path(join('assets', 'img', 'ui', 'play_screen_unresponsive_ui.png'))).convert_alpha()
         
         # Imports: Background Hearts
@@ -1218,12 +1223,13 @@ class Game:
         
         
         x = 75 * 0
-        patreon_button = Button(self.about_sprites, '', self.patreon_button_surfs, (x + 580, 760), self.font, 'dark')
-        twitter_button = Button(self.about_sprites, '', self.twitter_button_surfs, (x + 710, 760), self.font, 'dark')
-        bluesky_button = Button(self.about_sprites, '', self.bluesky_button_surfs, (x + 840, 760), self.font, 'dark')
-        cara_button = Button(self.about_sprites, '', self.cara_button_surfs, (x + 970, 760), self.font, 'dark')
-        tumblr_button = Button(self.about_sprites, '', self.tumblr_button_surfs, (x + 1100, 760), self.font, 'dark')
-        nsfw_button = Button(self.about_sprites, '', self.nsfw_button_surfs, (1230, 760), self.font, 'dark')
+        #patreon_button = Button(self.about_sprites, '', self.patreon_button_surfs, (x + 580, 760), self.font, 'dark')
+        #twitter_button = Button(self.about_sprites, '', self.twitter_button_surfs, (x + 710, 760), self.font, 'dark')
+        #bluesky_button = Button(self.about_sprites, '', self.bluesky_button_surfs, (x + 840, 760), self.font, 'dark')
+        #cara_button = Button(self.about_sprites, '', self.cara_button_surfs, (x + 970, 760), self.font, 'dark')
+        #tumblr_button = Button(self.about_sprites, '', self.tumblr_button_surfs, (x + 1100, 760), self.font, 'dark')
+        #nsfw_button = Button(self.about_sprites, '', self.nsfw_button_surfs, (1230, 760), self.font, 'dark')
+        linktree_button = Button(self.about_sprites, '', self.linktree_button_surfs, (960, 760), self.font, 'dark')
         
         return_button = Button(self.about_sprites, 'return to main menu', self.return_button_surfs, (settings.W / 2, 965), self.font, 'dark')
                         
@@ -1238,18 +1244,8 @@ class Game:
                     if event.key == pg.K_ESCAPE:
                         self.running = False
                 if event.type == pg.MOUSEBUTTONDOWN and pg.mouse.get_pressed()[0]:
-                    if patreon_button.check_for_input():
-                        webbrowser.open('https://www.patreon.com/c/stekken')
-                    if twitter_button.check_for_input():
-                        webbrowser.open('https://x.com/stekken_')
-                    if bluesky_button.check_for_input():
-                        webbrowser.open('https://bsky.app/profile/stekken.bsky.social')
-                    if cara_button.check_for_input():
-                        webbrowser.open('https://cara.app/stekken/all')
-                    if tumblr_button.check_for_input():
-                        webbrowser.open('https://www.tumblr.com/blog/stekken')
-                    if nsfw_button.check_for_input():
-                        webbrowser.open('https://linktr.ee/stekkennsfw')
+                    if linktree_button.check_for_input():
+                        webbrowser.open('https://linktr.ee/stekken')
                     if return_button.check_for_input():
                         self.sfx_button_click.play()
                         for sprite in self.about_sprites:
